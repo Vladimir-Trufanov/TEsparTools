@@ -10,14 +10,19 @@
 // Подключаем файлы обеспечения передачи и приёма сообщений через очередь 
 #include "QueMessage.h"     // заголовочный файл класса TQueMessage 
 #include "CommonMessage.h"  // общий реестр сообщений
+
+// Подключаем перечисление и контексты сообщений приложения - источник сообщений
 #include "QHM_Message.h"    // сообщения примера по обработке очередей
 TQueMessage queMessa;       // объект работы с сообщениями через очередь
+
 unsigned long nLoop=0UL;    // счётчик циклов задачи отправки сообщений 
+
 // Перечисляем режимы приема сообщений (Message reception modes)
 typedef enum {
    tmr_ONEATIME,        // 0 по одному               - one at a time
    tmr_QUEUERELEASE,    // 1 до освобождения очереди - before the queue is released
 } tModeReceive;
+
 // Задаём текущий режим приема сообщений
 int t_ModeReceive=tmr_QUEUERELEASE;
 // Определяем формат сообщения
