@@ -1,0 +1,53 @@
+[Config]
+Compilator.SaveAll=0
+Compilator.Capture=0
+Compilator.CompileOnBackground=0
+Compilator.ProgSaveAll=0
+Compilator.ProgRunSelection=0
+Compilator.LogType=0
+Compilator.LogEncoding=0
+DefaultDir=C:\TEsparTools
+DefaultCP=0
+LogtoEnd=1
+DontOpen=0
+AbsolutePath=0
+FileFormat=0
+ProjectFilesOnly=0
+Extensions=*.*
+[Project tree]
+TEsparTools
+	+TEsparTools
+		-examples
+			-QueueHandlMulti
+				examples\QueueHandlMulti\QueueHandlMulti.ino
+		+src
+			src\CommonMessage.h
+			src\QHM_Message.h
+			src\QueMessage.cpp
+			src\QueMessage.h
+		keywords.txt
+		library.properties
+		LICENSE
+		README.md
+		README.md.backup
+		TEsparTools.ppr
+[Open project files]
+0=src\QueMessage.h
+1=src\QueMessage.cpp
+2=src\QHM_Message.h
+3=src\CommonMessage.h
+[Selected Project Files]
+Main=
+Selected=src\QueMessage.h
+[src\QueMessage.h]
+TopLine=100
+Caret=9,133
+[src\QueMessage.cpp]
+TopLine=1
+Caret=38,6
+[src\QHM_Message.h]
+TopLine=4
+Caret=28,43
+[src\CommonMessage.h]
+TopLine=25
+Caret=47,102

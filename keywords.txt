@@ -1,0 +1,52 @@
+#######################################
+# Syntax Coloring Map For ExampleLibrary
+# KEYWORD KEYWORD_TOKENTYPE REFERENCE_LINK RSYNTAXTEXTAREA_TOKENTYPE
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+tQueue		KEYWORD1
+taskStruMess	KEYWORD1
+receiveStruMess	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+Create		KEYWORD2
+Send		KEYWORD2
+SendISR		KEYWORD2
+Receive		KEYWORD2
+How_many_free	KEYWORD2
+How_many_wait	KEYWORD2
+ExtractMess	KEYWORD2
+ExtractTime	KEYWORD2
+CollectMessage	KEYWORD2
+
+#######################################
+# Structures (KEYWORD3)
+#######################################
+
+tStruMessage			KEYWORD3 
+xHigherPriorityTaskWoken	KEYWORD3	  
+
+#######################################
+# Out Instances (KEYWORD2)
+#######################################
+
+transmess	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+QueueSize	LITERAL1
+TicksIsBusy	LITERAL1
+tBuffer		LITERAL1
+tMess		LITERAL1
+dtime		LITERAL1
+
+#######################################
+
