@@ -9,7 +9,10 @@
 
 #ifndef _QHM_Message
 #define _QHM_Message
-#pragma once     
+#pragma once   
+
+// Определяем источник сообщений  
+#define tmk_QHM  "QHM"  // пример по обработке очередей
 
 #ifdef tmk_QHM
 // Определяем перечисления примера обработки очередей --- QueueHandlMulti [QHM]
@@ -39,5 +42,4 @@ inline void messQueueHandlMulti(char tMess[], int Number, String fmess32, String
 #endif
 
 #endif
-
 // ********************************************************** QHM_Message.h ***
