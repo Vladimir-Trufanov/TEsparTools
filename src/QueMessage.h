@@ -77,6 +77,7 @@ class TQueMessage
    // Создать очередь
    String Create();
    // 1 группа сообщений: "Отправить просто сообщение, без уточнений"
+   String Send(String Type,String Source,int Number);
    String SendISR(String Type,String Source,int Number);
    // 2 группа: "Отправить сообщение с первым уточнением целого типа"
    String Send(String Type,String Source,int Number,int fmess32); 
