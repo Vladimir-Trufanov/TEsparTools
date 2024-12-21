@@ -22,8 +22,7 @@ TEsparTools
 			+QueueHandlMulti
 				examples\QueueHandlMulti\QHM_Message.h
 				examples\QueueHandlMulti\QueueHandlMulti.ino
-		-src
-			src\CommonMessage.h
+		+src
 			src\QueMessage.cpp
 			src\QueMessage.h
 		keywords.txt
@@ -33,26 +32,22 @@ TEsparTools
 		README.md.backup
 		TEsparTools.ppr
 [Open project files]
-0=src\QueMessage.h
-1=src\QueMessage.cpp
-2=src\CommonMessage.h
-3=examples\QueueHandlMulti\QueueHandlMulti.ino
-4=examples\QueueHandlMulti\QHM_Message.h
+0=examples\QueueHandlMulti\QueueHandlMulti.ino
+1=examples\QueueHandlMulti\QHM_Message.h
+2=src\QueMessage.cpp
+3=src\QueMessage.h
 [Selected Project Files]
 Main=
-Selected=examples\QueueHandlMulti\QHM_Message.h
-[src\QueMessage.h]
-TopLine=75
-Caret=87,100
-[src\QueMessage.cpp]
-TopLine=21
-Caret=75,47
-[src\CommonMessage.h]
-TopLine=62
-Caret=47,102
+Selected=src\QueMessage.h
 [examples\QueueHandlMulti\QueueHandlMulti.ino]
-TopLine=1
-Caret=76,1
+TopLine=75
+Caret=2,95
 [examples\QueueHandlMulti\QHM_Message.h]
 TopLine=1
-Caret=1,1
+Caret=16,15
+[src\QueMessage.cpp]
+TopLine=1
+Caret=1,30
+[src\QueMessage.h]
+TopLine=112
+Caret=1,126

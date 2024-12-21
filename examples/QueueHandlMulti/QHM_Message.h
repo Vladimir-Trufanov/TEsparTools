@@ -1,35 +1,39 @@
-/** Arduino, Esp32-CAM ******************************** QHM_Message.h ***
+/** Arduino, Esp32-CAM ************************************** QHM_Message.h ***
  * 
  *                         Перечисление сообщений примера по обработке очередей
- *                                       и функция заполнения буфера сообщением  
+ *                 и массив сообщений для заполнения буфера вывода на периферию
  * 
- * v2.0.1, 11.12.2024                                 Автор:      Труфанов В.Е.
+ * v2.1.0, 21.12.2024                                 Автор:      Труфанов В.Е.
  * Copyright © 2024 tve                               Дата создания: 29.11.2024
 **/
 
-#ifndef _QHM_Message
-#define _QHM_Message
-#pragma once     
+#pragma once 
+
+#include <QueMessage.h>     // заголовочный файл класса TQueMessage                      //
+
+// Определяем источник сообщений  
+#define tmk_APP "QHM"   // пример по обработке очередей
 
 // Определяем перечисления примера обработки очередей 
 typedef enum {
-   ItsBeenMS,            // 0 it's been %s milliseconds
-   SendFromTask,         // 1 %s message from the task has been sent
-   StructNoSend,         // 2 structure could not be sent after %s ticks
-   TaskNoQueue,          // 3 there is no queue of structures in the task
+   SendFromISR,          // 0 
+   SendFromTask,         // 1 
+   StructNoSend,         // 2 
+   TaskNoQueue,          // 3
    SendLongMess,         // 4 maxi=255+0
 }; 
 
-// Формируем контексты сообщений по номеру перечисления
-mbeg
-   messf32(ItsBeenMS,    "Прошло %s миллисекунд")
-   messf32(SendFromTask, "Передано %s сообщение из задачи")
-   messf32(StructNoSend, "Не удалось отправить структуру после %s тиков")
-   messb(  TaskNoQueue,  "Очереди структур нет в задаче")   
-   messb(  SendLongMess, "Максимально длинное сообщение из 255 байт [буфер текстов сообщений максимально может содержать 255 байт и завершающий ноль 1234567890 1234567890 1234567890]")   
-   messd(                "Неопределенное сообщение примера очередей")  
-mend                  
+// Формируем список сообщений приложения
+tmessAPP amessAPP[] = 
+{
+    {SendFromISR,  tvm_1intmes, "Передано %s сообщение из прерывания"},
+    {SendFromTask, tvm_2intmes, "Передано %s сообщение из задачи на %s миллисекунде"},
+    {StructNoSend, tvm_1intmes, "Не удалось отправить структуру после %d тиков"},
+    {TaskNoQueue,  tvm_simpmes, "Очереди структур нет в задаче"},
+    {SendLongMess, tvm_simpmes, "Максимально длинное сообщение из 255 байт [буфер текстов сообщений максимально может содержать 255 байт и завершающий ноль 1234567890 1234567890 1234567890]"},
+};
 
-#endif
+// Вычисляем размер списка
+int SizeMess=sizeof(amessAPP)/sizeof(tmessAPP);
 
-// **************************************************** QHM_Message.h ***
+// ********************************************************** QHM_Message.h ***
