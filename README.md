@@ -31,3 +31,5 @@ architectures=*
 
 #### 3. [Семантическое Версионирование 2.0.0](https://semver.org/lang/ru/)
 
+#### 4. [Пишем свою библиотеку](https://alexgyver.ru/lessons/library-writing/)
+
