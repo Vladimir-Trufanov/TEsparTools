@@ -19,12 +19,17 @@ Extensions=*.*
 TEsparTools
 	+TEsparTools
 		+examples
+			-Queue1024
+				examples\Queue1024\Que1024.cpp
+				examples\Queue1024\Que1024.h
+				examples\Queue1024\Queue1024.ino
 			+QueueHandlMulti
 				examples\QueueHandlMulti\QHM_Message.h
 				examples\QueueHandlMulti\QueueHandlMulti.ino
 		+src
 			src\QueMessage.cpp
 			src\QueMessage.h
+			src\TQueMessage.md
 		keywords.txt
 		library.properties
 		LICENSE
@@ -38,16 +43,16 @@ TEsparTools
 3=src\QueMessage.h
 [Selected Project Files]
 Main=
-Selected=src\QueMessage.h
+Selected=examples\QueueHandlMulti\QHM_Message.h
 [examples\QueueHandlMulti\QueueHandlMulti.ino]
-TopLine=75
-Caret=2,95
+TopLine=45
+Caret=73,45
 [examples\QueueHandlMulti\QHM_Message.h]
 TopLine=1
-Caret=16,15
+Caret=1,34
 [src\QueMessage.cpp]
-TopLine=1
-Caret=1,30
+TopLine=156
+Caret=42,156
 [src\QueMessage.h]
-TopLine=112
-Caret=1,126
+TopLine=105
+Caret=1,137

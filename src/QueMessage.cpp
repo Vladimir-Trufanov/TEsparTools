@@ -1,7 +1,7 @@
 /** Arduino, Esp32 ***************************************** QueMessage.cpp ***
  * 
  *                          Обеспечить передачу и приём сообщений через очередь 
- *                                                   в задачах и из прерываниях
+ *                                                    в задачах и из прерываний
  * 
  * v3.2.6, 21.12.2024                                 Автор:      Труфанов В.Е.
  * Copyright © 2024 tve                               Дата создания: 29.11.2024
@@ -111,7 +111,7 @@ String TQueMessage::SendISR(String Type,int Number,String Source)
       simpStruMess(); 
       // Сбрасываем признак переключения на более приоритетную задачу после прерывания 
       xHigherPriorityTaskWoken = pdFALSE;
-      // Отправляем сообщение в структуре AMessage 
+      // Отправляем сообщение в структуре  
       if (xQueueSendFromISR(tQueue,&taskStruMess,&xHigherPriorityTaskWoken) != pdPASS)
       {
          // Если "Не удалось отправить структуру из прерывания!" 
@@ -153,7 +153,7 @@ String TQueMessage::SendISR(String Type, int Number, int fmess32, String Source)
       f32StruMess(); 
       // Сбрасываем признак переключения на более приоритетную задачу после прерывания 
       xHigherPriorityTaskWoken = pdFALSE;
-      // Отправляем сообщение в структуре AMessage 
+      // Отправляем сообщение в структуре 
       if (xQueueSendFromISR(tQueue,&taskStruMess,&xHigherPriorityTaskWoken) != pdPASS)
       {
          // Если "Не удалось отправить структуру из прерывания!" 

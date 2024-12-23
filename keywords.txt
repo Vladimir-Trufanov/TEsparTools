@@ -43,7 +43,6 @@ transmess	KEYWORD2
 #######################################
 
 QueueSize	LITERAL1
-TicksIsBusy	LITERAL1
 tBuffer		LITERAL1
 tMess		LITERAL1
 dtime		LITERAL1
