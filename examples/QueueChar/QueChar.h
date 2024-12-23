@@ -1,4 +1,4 @@
-/** Arduino, Esp32 ********************************************** Que1024.h ***
+/** Arduino, Esp32 ********************************************** QueChar.h ***
  * 
  *     Обеспечить передачу и приём сообщений "как есть", максимум 1023 символа, 
  *               плюс завершающий ноль, через очередь в задачах и из прерываний
@@ -11,7 +11,7 @@
 #include "Arduino.h"
 
 // Передатчик сообщения на периферию с возможным префиксом (по умолчанию):
-inline void transQue1024(char *mess, char *prefix="") 
+inline void transQue(char *mess, char *prefix="") 
 {
    // Выводим массивы символов с 0-вым окончанием
    Serial.print(prefix);  // передали префикс (по умолчанию отсутствует)
@@ -34,17 +34,17 @@ inline void transQue1024(char *mess, char *prefix="")
 #define tFailSend           "Очередь занята, не удалось отправить сообщение"   
 
 // Определяем структуру передаваемого сообщения
-struct tStruMess1024
+struct tStruMess
 {
    char mess[1024]; 
 };
 
-class TQue1024
+class TQue
 {
    public:
 
    // Построить объект (конструктор класса)
-   TQue1024(int iQueueSize=4);
+   TQue(int iQueueSize=4);
    // Создать очередь
    String Create();
    // Отправить сообщение из задачи
@@ -63,26 +63,27 @@ class TQue1024
    char* Post(char *prefix="");
    // Выбрать все сообщения разом из очереди и отправить на периферию
    void PostAll(char *prefix="");
+   char* strcopy1024(String Source);
 
    private:
 
    void (*atatchedF)(char *mess, char *prefix); // прикреплённая функция
    int QueueSize;                               // размер очереди 
-   struct tStruMess1024 taskStruMess;           // структура для для отправки сообщения 
-   struct tStruMess1024 receiveStruMess;        // структура для для приема сообщения 
+   struct tStruMess taskStruMess;               // структура для для отправки сообщения 
+   struct tStruMess receiveStruMess;            // структура для для приема сообщения 
    char tBuffer[1024];                          // буфер сообщения на 1023 символа и завершающий ноль
    QueueHandle_t tQueue;                        // очередь (дескриптор) сообщений из структур tStruMess1024   
-   /*
+   // Выделяем переменную планировщику задач FreeRTOS для указания
+   // необходимости переключения после прерывания на более приоритетную 
+   // задачу, связанную с очередью
+   BaseType_t xHigherPriorityTaskWoken;
+    /*
    char tMess[256];                             // буфер предварительного размещения контекста сообщения
    char dtime[20];                              // буфер даты и времени
    String SourceMessage;                        // источник сообщения
    String EmptyMessage="";                      // пустое сообщение
    tmessAPP* amessAPP;                          // указатель на массив сообщений
    int SizeMess;                                // размер массива сообщений
-   // Выделяем переменную планировщику задач FreeRTOS для указания
-   // необходимости переключения после прерывания на более приоритетную 
-   // задачу, связанную с очередью
-   BaseType_t xHigherPriorityTaskWoken;
    // Извлечь сообщение по источнику перечисления и номеру сообщения
    void ExtractMess(String Source,int Number,String fmess32,String smess32);
    // Извлечь информацию о текущем времени в отформатированном виде 
@@ -94,4 +95,4 @@ class TQue1024
    */
 };
 
-// ************************************************************** Que1024.h ***
+// ************************************************************** QueChar.h ***

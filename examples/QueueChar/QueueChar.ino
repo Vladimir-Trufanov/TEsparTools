@@ -1,4 +1,4 @@
-/** Arduino-Esp32-CAM                                     *** Queue1024.ino ***
+/** Arduino-Esp32-CAM                                     *** QueueChar.ino ***
  * 
  *                        Пример передачи сообщения из задачи и из прерывания с
  *                                                     приемом в основном цикле
@@ -31,9 +31,9 @@
 
 // ============================================== 1. Инициировать использование очереди ===
 // Подключаем файлы обеспечения передачи и приёма сообщений через очередь                //
-#include <Que1024.h>     // заголовочный файл класса TQueMessage                         //
+#include "QueChar.h"     // заголовочный файл класса TQueMessage                         //
 // Назначаем объект работы с сообщениями через очередь                                   //
-TQue1024 queMessa();                                                                  //
+TQue queMessa;                                                                           //
 // ========================================================================================                                                                                         
 
 // Выделяем счётчик циклов задачи отправки сообщений       
@@ -58,7 +58,7 @@ void ARDUINO_ISR_ATTR onTimer()
    nLoopISR++;
    String inMess=queMessa.SendISR("Передано сообщение из прерывания");
    // Если невозможно отправить сообщение, то сообщаем
-   if (inMess!=isOk) Serial.println(inMess); 
+   if (inMess!=tisOk) Serial.println(inMess); 
 
    #ifdef tmr_TASKPRIORITY
        Serial.print("ISR: "); Serial.println(uxTaskPriorityGet(NULL));     
@@ -82,8 +82,11 @@ void setup()
    // Если очередь получилась, то отмечаем  "Очередь сформирована"                       //
    else Serial.println(tQueueBeformed);                                                  //
    // Подключаем функцию передачи сообщения на периферию                                 //
-   queMessa.attachFunction(transQue1024);                                                //
+   queMessa.attachFunction(transQue);                                                    //
    // ===================================================================================== 
+
+   Serial.println(queMessa.strcopy1024("String"));
+
 
    // Определяем дополнительную задачу по отправке сообщений
    xTaskCreatePinnedToCore (
@@ -161,7 +164,7 @@ void vSendMess (void *pvParameters)
       if (currMillis < lastMillis) lastMillis=0;
       timeMillis=currMillis-lastMillis;
       String inMess=queMessa.Send("Передано сообщение из задачи на очередной миллисекунде");
-      if (inMess!=isOk) Serial.println(inMess); 
+      if (inMess!=tisOk) Serial.println(inMess); 
       vTaskDelay(1900/portTICK_PERIOD_MS);
    }
 }
@@ -206,8 +209,9 @@ void loop()
    delay(2100);
    // Отправляем информационное сообщение  
    // "Максимально длинное сообщение из 255 байт [буфер текстов сообщений максимально может содержать 255 байт и завершающий ноль 1234567890 1234567890 1234567890]"
-   String inMess=queMessa.Send("Максимально длинное сообщение");
-   if (inMess!=tisOk) Serial.println(inMess); 
+   String inMess;
+   //inMess=queMessa.Send("Максимально длинное сообщение");
+   //if (inMess!=tisOk) Serial.println(inMess); 
 }
 
-// ********************************************************** Queue1024.ino ***
+// ********************************************************** QueueChar.ino ***

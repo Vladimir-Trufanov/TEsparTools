@@ -1,4 +1,4 @@
-/** Arduino, Esp32 ******************************************** Que1024.cpp ***
+/** Arduino, Esp32 ******************************************** QueChar.cpp ***
  * 
  *                          Обеспечить передачу и приём сообщений через очередь 
  *                                                   в задачах и из прерываниях
@@ -10,12 +10,12 @@
 #include "Arduino.h"
 
 // Подключаем файлы обеспечения передачи и приёма сообщений через очередь 
-#include "Que1024.h"
+#include "QueChar.h"
 
 // ****************************************************************************
 // *                  Построить объект (конструктор класса)                   *
 // ****************************************************************************
-TQue1024::TQue1024(int iQueueSize)
+TQue::TQue(int iQueueSize)
 {
    // Определяем размер очереди из структур 
    QueueSize=iQueueSize;
@@ -23,19 +23,49 @@ TQue1024::TQue1024(int iQueueSize)
 // ****************************************************************************
 // *                        Создать очередь сообщений                         *
 // ****************************************************************************
-String TQue1024::Create()
+String TQue::Create()
 {
    // Инициируем успешное сообщение
    String inMess=tisOk;
-   tQueue = xQueueCreate(QueueSize, sizeof(struct tStruMess1024));
+   tQueue = xQueueCreate(QueueSize, sizeof(struct tStruMess));
    // Возвращаем ошибку "Очередь не была создана и не может использоваться" 
    if (tQueue==NULL) inMess=tQueueNotCreate; 
+
+   strcopy1024("String Source");
+   
    return inMess;
 };
+
+char* TQue::strcopy1024(String Source)
+{
+   const char* message_ptr = Source.c_str();
+   int i=0;
+   while(message_ptr[i]>0)
+   {
+      tBuffer[i]=message_ptr[i];
+      i++;
+      if (i>8) break;
+   }
+   tBuffer[i]=0;
+   return tBuffer;
+   
+    
+   //Serial.println(Source);
+   /*
+   int i=0;
+   while((Source.c_str())[i]>0)
+   {
+      tBuffer[i]=(Source.c_str())[i];
+      i++;
+      if (i>1023) break;
+   }
+   tBuffer[i]=0;
+   */
+}
 // ****************************************************************************
 // *                          Отправить сообщение из задачи                   *
 // ****************************************************************************
-String TQue1024::Send(String Source)
+String TQue::Send(String Source)
 {
    // Инициируем успешное сообщение
    String inMess=tisOk;
@@ -53,7 +83,7 @@ String TQue1024::Send(String Source)
    else inMess=tQueueNotSend;
    return inMess; 
 }
-String TQue1024::SendISR(String Source) 
+String TQue::SendISR(String Source) 
 {
    // Инициируем пустое сообщение
    String inMess=tisOk;
@@ -79,7 +109,7 @@ String TQue1024::SendISR(String Source)
 // ****************************************************************************
 // *        Подключить внешнюю функцию передачи сообщения на периферию        *
 // ****************************************************************************
-void TQue1024::attachFunction(void (*function)(char *mess, char *prefix)) 
+void TQue::attachFunction(void (*function)(char *mess, char *prefix)) 
 {
    atatchedF = *function;  
 }
@@ -87,7 +117,7 @@ void TQue1024::attachFunction(void (*function)(char *mess, char *prefix))
 // *            Определить, сколько сообщений накопилось в очереди            *
 // *                            и их можно выгрузить                          *
 // ****************************************************************************
-int TQue1024::How_many_wait()                 
+int TQue::How_many_wait()                 
 {
    // Инициируем отсутствие массива очереди
    int nMess = -1; 
@@ -98,7 +128,7 @@ int TQue1024::How_many_wait()
 // ****************************************************************************
 // *              Определить количество свободных мест в очереди              *
 // ****************************************************************************
-int TQue1024::How_many_free() 
+int TQue::How_many_free() 
 {               
    // Инициируем отсутствие массива очереди
    int Space = -1; 
@@ -109,7 +139,7 @@ int TQue1024::How_many_free()
 // ****************************************************************************
 // *                              Принять сообщение                           *
 // ****************************************************************************
-char* TQue1024::Receive()
+char* TQue::Receive()
 {
    // Принимаем сообщение
    if (tQueue!=NULL)
@@ -120,6 +150,8 @@ char* TQue1024::Receive()
       // (без блокировки задачи при пустой очереди)
       if (nMess>0)
       {
+         // Чистим буфер сообщения
+         sprintf(tBuffer,""); 
          // Если сообщение выбралось из очереди успешно, то собираем его в буфер
          if (xQueueReceive(tQueue,&receiveStruMess,(TickType_t )0)==pdPASS) 
          {        
@@ -140,7 +172,7 @@ char* TQue1024::Receive()
 // ****************************************************************************
 // *          Выбрать сообщение из очереди и отправить на периферию           *
 // ****************************************************************************
-char* TQueMessage::Post(char *prefix)
+char* TQue::Post(char *prefix)
 {
    Receive(); 
    if (String(tBuffer)!=tQueueEmptyReceive) (*atatchedF)(tBuffer,prefix); 
@@ -149,7 +181,7 @@ char* TQueMessage::Post(char *prefix)
 // ****************************************************************************
 // *      Выбрать все сообщения разом из очереди и отправить на периферию     *
 // ****************************************************************************
-void TQueMessage::PostAll(char *prefix)
+void TQue::PostAll(char *prefix)
 {
    int iwait=How_many_wait();
    while(iwait>0)
@@ -159,6 +191,77 @@ void TQueMessage::PostAll(char *prefix)
       iwait=How_many_wait();
    }
 }
+
+/*
+// Может пригодится!!!
+
+// Сделать определитель типов:
+#define tstr "tstr"
+#define tchr "tchr"
+#define tint "tint"
+String types(String a) {return tstr;}
+String types(char *a)  {return tchr;}
+String types(int a)    {return tint;}
+
+// Перевести массив char в String и обратно
+void schastr()
+{
+   // Определяем структуру изменяемого сообщения
+   struct AMessage
+   {
+      int  ucSize;        // Длина сообщения (максимально 256 байт)
+      char ucData[256];   // Текст сообщения
+   }  xMessage;
+   
+   String temp = "Всем привет!";
+   strcpy(xMessage.ucData, temp.c_str());
+   xMessage.ucSize = 0;
+   while (xMessage.ucData[xMessage.ucSize]>0) 
+   {
+      xMessage.ucSize++;
+   }
+   Serial.println(temp);
+   Serial.println(types(temp));
+   Serial.println(xMessage.ucData);
+   Serial.println(types(xMessage.ucData));
+   Serial.println(xMessage.ucSize);
+   Serial.println(types(xMessage.ucSize));
+   
+   String temp1=String(xMessage.ucData);
+   Serial.println(temp1);
+   Serial.println(temp1.length());
+   Serial.println("-----");
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 // ****************************************************************************
@@ -257,4 +360,4 @@ void TQueMessage::CollectMessage(int t_MessFormat)
    }
 }
 */
-// ************************************************************ Que1024.cpp ***
+// ************************************************************ QueChar.cpp ***
