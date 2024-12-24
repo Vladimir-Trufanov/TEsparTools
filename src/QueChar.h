@@ -17,10 +17,6 @@ inline void transQue(char *mess, char *prefix="")
    Serial.print(prefix);  // передали префикс (по умолчанию отсутствует)
    Serial.println(mess);  // передали сообщение
 }
-// Пример передачи сообщения из очереди через передатчик на периферию:
-//    static char str[] = "Hello: ";
-//    queMessa.Post(queMessa.Receive(MessFormat),str);
-
 // Сообщения из методов по обслуживанию очередей вне формата 
 // (в стандартный последовательный порт или в прочие периферии)
 #define tisOk               "Всё хорошо" 

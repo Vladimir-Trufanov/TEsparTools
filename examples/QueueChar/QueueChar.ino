@@ -184,7 +184,7 @@ void vReceiveMess (void *pvParameters)
       #ifdef tmr_QUEUERELEASE
          queMessa.PostAll();
       #else
-         queMessa.Post(tfm_NOTIME,"Hello: ");
+         queMessa.Post("Hello: ");
       #endif
 
       #ifdef tmr_SHOWQUEUESIZE

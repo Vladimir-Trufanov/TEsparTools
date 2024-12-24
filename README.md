@@ -1,12 +1,12 @@
-# [TEsparTools, v3.2.6]()
+# [TEsparTools, v3.2.7]()
 
 Библиотека прикладных классов и функций в IDE Arduino для ESP. Как правило, модули библиотеки опираются на операционную систему ***FreeRTOS***.
 
-#### На [2024-12-21]() в состав библиотеки входит только один класс - TQueMessage. 
-
 ---
 
-### [TQueMessage - обеспечить передачу и приём сообщений через очередь в задачах и из прерываний](src/TQueMessage.md)
+### [TQue -  Обеспечить передачу и приём сообщений "как есть", максимум 1023 символа, плюс завершающий ноль, через очередь в задачах и из прерываний](extras/TQue.md) v1.0.0, 23.12.2024 
+
+### [TQueMessage - обеспечить передачу и приём сообщений через очередь в задачах и из прерываний](extras/TQueMessage.md) v3.2.6, 21.12.2024 
 
 ---
 
@@ -14,7 +14,7 @@
 
 ```
 name=TEsparTools
-version=3.2.6
+version=3.2.7
 author=Труфанов Владимир Евгеньевич, tve@karelia.ru, <tve58@inbox.ru>
 maintainer=Trufanov Vladimir https://doortry.ru/kroshki-opyta/
 sentence=Library of application classes and functions ESP32-FreeRTOS on IDE Arduino 1.8.19

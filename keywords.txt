@@ -8,6 +8,7 @@
 #######################################
 
 tQueue		KEYWORD1
+TQue  KEYWORD1 
 taskStruMess	KEYWORD1
 receiveStruMess	KEYWORD1
 
@@ -30,6 +31,7 @@ CollectMessage	KEYWORD2
 #######################################
 
 tStruMessage			KEYWORD3 
+tStruMess   KEYWORD3
 xHigherPriorityTaskWoken	KEYWORD3	  
 
 #######################################
@@ -37,6 +39,7 @@ xHigherPriorityTaskWoken	KEYWORD3
 #######################################
 
 transmess	KEYWORD2
+transQue KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
