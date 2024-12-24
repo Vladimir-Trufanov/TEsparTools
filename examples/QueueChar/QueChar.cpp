@@ -30,37 +30,22 @@ String TQue::Create()
    tQueue = xQueueCreate(QueueSize, sizeof(struct tStruMess));
    // Возвращаем ошибку "Очередь не была создана и не может использоваться" 
    if (tQueue==NULL) inMess=tQueueNotCreate; 
-
-   strcopy1024("String Source");
-   
    return inMess;
 };
-
-char* TQue::strcopy1024(String Source)
+// ****************************************************************************
+// *  Скопировать не более 1023 символов сообщения в буфер и завершить нулем  *
+// ****************************************************************************
+void TQue::strcopy1024(String Source)
 {
    const char* message_ptr = Source.c_str();
    int i=0;
    while(message_ptr[i]>0)
    {
-      tBuffer[i]=message_ptr[i];
+      taskStruMess.mess[i]=message_ptr[i];
       i++;
-      if (i>8) break;
+      if (i>1022) break;
    }
-   tBuffer[i]=0;
-   return tBuffer;
-   
-    
-   //Serial.println(Source);
-   /*
-   int i=0;
-   while((Source.c_str())[i]>0)
-   {
-      tBuffer[i]=(Source.c_str())[i];
-      i++;
-      if (i>1023) break;
-   }
-   tBuffer[i]=0;
-   */
+   taskStruMess.mess[i]=0;
 }
 // ****************************************************************************
 // *                          Отправить сообщение из задачи                   *
@@ -72,7 +57,7 @@ String TQue::Send(String Source)
    // Если очередь создана, то отправляем сообщение в очередь
    if (tQueue!=0)
    {
-      strcpy(taskStruMess.mess, Source.c_str());                              
+      strcopy1024(Source);
       if (xQueueSend(tQueue,&taskStruMess,(TickType_t)0) != pdPASS)        
       {                                                                    
          sprintf(tBuffer,tFailSend);                                         
@@ -91,7 +76,7 @@ String TQue::SendISR(String Source)
    if (tQueue!=0)
    {
       // Формируем сообщение для передачи в очередь
-      strcpy(taskStruMess.mess, Source.c_str());                              
+      strcopy1024(Source);
       // Сбрасываем признак переключения на более приоритетную задачу после прерывания 
       xHigherPriorityTaskWoken = pdFALSE;
       // Отправляем сообщение в структуре  
@@ -191,7 +176,6 @@ void TQue::PostAll(char *prefix)
       iwait=How_many_wait();
    }
 }
-
 /*
 // Может пригодится!!!
 
@@ -231,133 +215,6 @@ void schastr()
    Serial.println(temp1);
    Serial.println(temp1.length());
    Serial.println("-----");
-}
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-// ****************************************************************************
-// *      Извлечь сообщение из массива по номеру и заполнить уточнениями      *
-// ****************************************************************************
-void TQueMessage::ExtractMess(String Source, int Number, String fmess32, String smess32) 
-{
-   sprintf(tMess,"Неопределенное сообщение примера очередей");
-   for(int i=0; i<SizeMess; i++) 
-   {
-      if (i==Number)
-      {
-         // Выводим "простое сообщение, без уточнений"
-         if (amessAPP[i].vmess==tvm_simpmes)
-         { 
-            sprintf(tMess,amessAPP[i].cmess); break;
-         }
-         // Выводим "сообщение c одним уточнением целого типа"
-         if (amessAPP[i].vmess==tvm_1intmes) 
-         {
-            sprintf(tMess,amessAPP[i].cmess,fmess32); break;
-         }
-         // Выводим "сообщение c одним уточнением целого типа"
-         if (amessAPP[i].vmess==tvm_2intmes) 
-         {
-            sprintf(tMess,amessAPP[i].cmess,fmess32,smess32); break;
-         }
-      }
-   }
-}
-// ****************************************************************************
-// *                              Собрать сообщение                           *
-// ****************************************************************************
-// Определить сколько символов без нуля в массиве char 
-int TQueMessage::CharSize(char mess[])
-{
-   int nSize=0;
-   while(mess[nSize]>0)
-   {
-      nSize++;
-   }
-   return nSize;
-}
-void TQueMessage::CollectMessage(int t_MessFormat)
-{
-   // char Type[7];                     - Тип сообщения
-   // char Source[7];                   - Источник сообщения
-   // int  Number;                      - Номер сообщения
-   // char fmess32[32];                 - Первое уточнение сообщения
-   // char smess32[32];                 - Второе уточнение сообщения
-
-   // tfm_BRIEF,  0 Краткий             - WARNING-ISR[2]
-   // tfm_NOTIME, 1 Без даты и времени  - WARNING-ISR[2] Управление передаётся планировщику
-   // tfm_FULL,   2 Полный              - 2024-11-29,19:36:18 WARNING-ISR[2] Управление передаётся планировщику
-
-   // Чистим буфер сообщения
-   sprintf(tBuffer,""); 
-   // Формируем краткое сообщение
-   sprintf(tMess,""); 
-   strcat(tMess, receiveStruMess.Type);
-   strcat(tMess, "-");
-   strcat(tMess, receiveStruMess.Source);
-   strcat(tMess, "[");
-   strcat(tMess, String(receiveStruMess.Number).c_str());
-   strcat(tMess, "]");
-   // Если заказан вывод кратких сообщений, то возвращаем сообщение
-   if (t_MessFormat==tfm_BRIEF) strcat(tBuffer,tMess);
-   else 
-   {
-      // Переделываем начало полного сообщения
-      if (t_MessFormat==tfm_FULL)
-      {
-         // Если заказан вывод полных сообщений, то вытаскиваем дату и время  
-         ExtractTime();
-         sprintf(tBuffer,""); 
-         strcat(tBuffer,dtime);
-         strcat(tBuffer," ");
-      }
-      // Вкладываем фрагмент краткого сообщения
-      strcat(tBuffer,tMess);
-      // По источнику и номеру сообщения извлекаем контекст сообщения
-      ExtractMess(String(receiveStruMess.Source),receiveStruMess.Number,String(receiveStruMess.fmess32),String(receiveStruMess.smess32));
-      strcat(tBuffer, " ");
-      // Определяем насколько заполнился буфер 
-      int nFill=CharSize(tBuffer);
-      // Переносим оставшееся/возможное число символов в буфер
-      int i=0;
-      while(tMess[i]>0)
-      {
-         tBuffer[nFill]=tMess[i];
-         nFill++; i++;
-         // Проверяем не вышли ли за максимальный размер буфера
-         if (nFill>254) break;
-      }
-      tBuffer[nFill]=0;
-   }
 }
 */
 // ************************************************************ QueChar.cpp ***

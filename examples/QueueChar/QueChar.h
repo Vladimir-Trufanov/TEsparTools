@@ -63,7 +63,6 @@ class TQue
    char* Post(char *prefix="");
    // Выбрать все сообщения разом из очереди и отправить на периферию
    void PostAll(char *prefix="");
-   char* strcopy1024(String Source);
 
    private:
 
@@ -73,26 +72,12 @@ class TQue
    struct tStruMess receiveStruMess;            // структура для для приема сообщения 
    char tBuffer[1024];                          // буфер сообщения на 1023 символа и завершающий ноль
    QueueHandle_t tQueue;                        // очередь (дескриптор) сообщений из структур tStruMess1024   
-   // Выделяем переменную планировщику задач FreeRTOS для указания
+   // Выделить переменную планировщику задач FreeRTOS для указания
    // необходимости переключения после прерывания на более приоритетную 
    // задачу, связанную с очередью
    BaseType_t xHigherPriorityTaskWoken;
-    /*
-   char tMess[256];                             // буфер предварительного размещения контекста сообщения
-   char dtime[20];                              // буфер даты и времени
-   String SourceMessage;                        // источник сообщения
-   String EmptyMessage="";                      // пустое сообщение
-   tmessAPP* amessAPP;                          // указатель на массив сообщений
-   int SizeMess;                                // размер массива сообщений
-   // Извлечь сообщение по источнику перечисления и номеру сообщения
-   void ExtractMess(String Source,int Number,String fmess32,String smess32);
-   // Извлечь информацию о текущем времени в отформатированном виде 
-   void ExtractTime();
-   // Собрать сообщение
-   void CollectMessage(int t_MessFormat);
-   // Определить сколько символов без нуля в массиве char 
-   int CharSize(char mess[]);
-   */
+   // Скопировать не более 1023 символов сообщения в буфер и завершить нулем
+   void strcopy1024(String Source);            
 };
 
 // ************************************************************** QueChar.h ***
