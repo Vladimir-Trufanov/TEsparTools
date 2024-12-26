@@ -81,8 +81,8 @@ typedef enum {
 // Определяем структуру передаваемого сообщения
 struct tStruMessage
 {
-   char Type[7];         // Тип сообщения
-   char Source[7];       // Источник сообщения
+   char Type[8];         // Тип сообщения
+   char Source[8];       // Источник сообщения
    int  Number;          // Номер сообщения
    char fmess32[32];     // Первое уточнение сообщения
    char smess32[32];     // Второе уточнение сообщения
@@ -145,6 +145,12 @@ class TQueMessage
    void CollectMessage(int t_MessFormat);
    // Определить сколько символов без нуля в массиве char 
    int CharSize(char mess[]);
+   // Сформировать простое сообщение, без уточнений  
+   void simpStruMess(String Type, int Number, String Source);
+   // Сформировать сообщение c одним уточнением целого типа         
+   void f32StruMess(String Type, int Number, int fmess32, String Source);
+   // Сформировать сообщение c двумя уточнениями целого типа         
+   void fs32StruMess(String Type, int Number, int fmess32, int smess32, String Source);
 };
 
 // Уровни вывода сообщений
