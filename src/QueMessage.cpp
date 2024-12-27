@@ -3,7 +3,7 @@
  *                          Обеспечить передачу и приём сообщений через очередь 
  *                                                    в задачах и из прерываний
  * 
- * v3.2.7, 26.12.2024                                 Автор:      Труфанов В.Е.
+ * v3.2.8, 26.12.2024                                 Автор:      Труфанов В.Е.
  * Copyright © 2024 tve                               Дата создания: 29.11.2024
 **/
 
@@ -93,7 +93,7 @@ void TQueMessage::fs32StruMess(String Type, int Number, int fmess32, int smess32
    if (Source==isOk) strcpy(taskStruMess.Source, SourceMessage.c_str());  
    else strcpy(taskStruMess.Source, str.c_str());                     
    taskStruMess.Number=Number;                                           
-   sprintf(taskStruMess.fmess32, "%d", fmess32);                         \
+   sprintf(taskStruMess.fmess32, "%d", fmess32);                         
    sprintf(taskStruMess.smess32, "%d", smess32);
 };    
 // Макрос: отправить сообщение из задачи или основного цикла
