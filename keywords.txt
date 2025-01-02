@@ -9,6 +9,7 @@
 
 tQueue		KEYWORD1
 TQue  KEYWORD1 
+TAttachSNTP	KEYWORD1
 taskStruMess	KEYWORD1
 receiveStruMess	KEYWORD1
 
@@ -25,6 +26,12 @@ How_many_wait	KEYWORD2
 ExtractMess	KEYWORD2
 ExtractTime	KEYWORD2
 CollectMessage	KEYWORD2
+
+strTime		KEYWORD2
+strLocalTime	KEYWORD2
+getservername	KEYWORD2
+gettimezone	KEYWORD2
+getsynchromin	KEYWORD2 
 
 #######################################
 # Structures (KEYWORD3)
