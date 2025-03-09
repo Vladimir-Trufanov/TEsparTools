@@ -1,9 +1,9 @@
 /** Arduino, Esp32 ******************************************* QueMessage.h ***
  * 
  *                          Обеспечить передачу и приём сообщений через очередь 
- *                                                   в задачах и из прерыванийх
+ *                                                    в задачах и из прерываний
  * 
- * v3.2.8, 26.12.2024                                 Автор:      Труфанов В.Е.
+ * v3.3.0, 09.03.2025                                 Автор:      Труфанов В.Е.
  * Copyright © 2024 tve                               Дата создания: 29.11.2024
 **/
 
@@ -26,6 +26,7 @@ enum {
    tvm_simpmes,   // 0 простое сообщение, без уточнений
    tvm_1intmes,   // 1 сообщение c одним уточнением целого типа
    tvm_2intmes,   // 2 сообщение c двумя уточнениями целого типа
+   tvm_3strmes,   // 3 сообщение c уточнением типа String
 };
 // Структуру элемента массива сообщений приложения
 struct tmessAPP
@@ -98,13 +99,15 @@ class TQueMessage
    // Создать очередь
    String Create();
    // 1 группа сообщений: "Отправить просто сообщение, без уточнений"
-   String    Send(String Type,int Number,String Source=isOk); 
-   String SendISR(String Type,int Number,String Source=isOk);
+   String    Send(String Type,int Number); 
+   String SendISR(String Type,int Number);
    // 2 группа: "Отправить сообщение с одним уточнением целого типа"
    String    Send(String Type,int Number,int fmess32,String Source=isOk); 
    String SendISR(String Type,int Number,int fmess32,String Source=isOk); 
    // 3 группа: "Отправить сообщение с двумя уточнениями целого типа"
-   String    Send(String Type,int Number,int fmess32,int smess32,String Source=isOk);
+   String Send(String Type,int Number,int fmess32,int smess32,String Source=isOk);
+   // 4 группа: Отправить сообщение c одним уточнением типа String (31 символ)
+   String Send(String Type,int Number,String fmess32);
 
    // Выбрать сообщение из очереди
    char* Receive(int t_MessFormat=tfm_FULL);
@@ -146,11 +149,15 @@ class TQueMessage
    // Определить сколько символов без нуля в массиве char 
    int CharSize(char mess[]);
    // Сформировать простое сообщение, без уточнений  
-   void simpStruMess(String Type, int Number, String Source);
+   void simpStruMess(String Type, int Number);
    // Сформировать сообщение c одним уточнением целого типа         
    void f32StruMess(String Type, int Number, int fmess32, String Source);
+   // Сформировать сообщение c одним уточнением типа String (31 символ)  
+   void f32sStruMess(String Type, int Number, String fmess32);
    // Сформировать сообщение c двумя уточнениями целого типа         
    void fs32StruMess(String Type, int Number, int fmess32, int smess32, String Source);
+   // Сформировать сообщение c уточнением типа String        
+   void fs32StruMess(String Type, int Number, int fmess32);
 };
 
 // Уровни вывода сообщений

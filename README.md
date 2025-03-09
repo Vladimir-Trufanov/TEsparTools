@@ -1,4 +1,4 @@
-# [TEsparTools, v3.2.9]() 02.01.2025 
+# [TEsparTools, v3.3.0]() 09.03.2025 
 
 Библиотека прикладных классов и функций в IDE Arduino для ESP. Как правило, модули библиотеки опираются на операционную систему ***FreeRTOS***.
 
@@ -8,7 +8,7 @@
 
 ### TQue - [Обеспечить передачу и приём сообщений "как есть", максимум 1023 символа, плюс завершающий ноль, через очередь в задачах и из прерываний](extras/TQue.md) - v1.0.0, 23.12.2024 
 
-### TQueMessage - [Обеспечить передачу и приём сообщений через очередь в задачах и из прерываний](extras/TQueMessage.md) - v3.2.8, 26.12.2024 
+### TQueMessage - [Обеспечить передачу и приём сообщений через очередь в задачах и из прерываний](extras/TQueMessage.md) - v3.3.0, 09.03.2025
 
 ---
 
@@ -16,16 +16,25 @@
 
 ```
 name=TEsparTools
-version=3.2.9
+version=3.3.0
 author=Труфанов Владимир Евгеньевич, tve@karelia.ru, <tve58@inbox.ru>
 maintainer=Trufanov Vladimir https://doortry.ru/kroshki-opyta/
-sentence=Library of application classes and functions ESP32-FreeRTOS on IDE Arduino 1.8.19
-paragraph=Библиотека прикладных классов и функций в IDE Arduino 1.8.19, Espressif Systems 3.0.5+
+sentence=Library of application classes and functions ESP32-FreeRTOS on IDE Arduino 1.8.19+
+paragraph=Библиотека прикладных классов и функций в IDE Arduino 1.8.19+, Espressif Systems 3.0.5+
 category=Device Control
 url=https://github.com/Vladimir-Trufanov/TEsparTools
 architectures=*
 ```
 ### Обновления
+
+#### v3.3.0, 09.03.2025
+
+Добавлен метод для отправки сообщения c одним уточнением типа String (31 символ) в класс TQueMessage - обеспечить передачу и приём сообщений через очередь в задачах и из прерываний:
+
+```
+// 4 группа: Отправить сообщение c одним уточнением типа String (31 символ)
+String Send(String Type, int Number, String fmess32);
+```
 
 #### v3.2.9, 02.01.2025
 

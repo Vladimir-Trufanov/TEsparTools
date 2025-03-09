@@ -3,7 +3,7 @@
  *                        Пример передачи сообщения из задачи и из прерывания с
  *                                                     приемом в основном цикле
  * 
- * v3.2.6, 21.12.2024                                 Автор:      Труфанов В.Е.
+ * v3.2.7, 09.03.2024                                 Автор:      Труфанов В.Е.
  * Copyright © 2024 tve                               Дата создания: 21.11.2024
 **/
 
@@ -215,8 +215,11 @@ void loop()
       Serial.print("Loop: "); Serial.println(uxTaskPriorityGet(NULL));     
    #endif
    delay(2100);
-   // Отправляем информационное сообщение  "Передано %s сообщение из задачи на %s миллисекунде")
+   // Отправляем максимально длинное сообщение
    String inMess=queMessa.Send(tmt_NOTICE,SendLongMess);
+   if (inMess!=isOk) Serial.println(inMess); 
+   // Отправляем сообщение c уточнением типа String
+   inMess=queMessa.Send(tmt_NOTICE,SendStrExt,"типа String");
    if (inMess!=isOk) Serial.println(inMess); 
 }
 

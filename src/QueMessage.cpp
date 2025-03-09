@@ -3,7 +3,7 @@
  *                          Обеспечить передачу и приём сообщений через очередь 
  *                                                    в задачах и из прерываний
  * 
- * v3.2.8, 26.12.2024                                 Автор:      Труфанов В.Е.
+ * v3.3.0, 09.03.2025                                 Автор:      Труфанов В.Е.
  * Copyright © 2024 tve                               Дата создания: 29.11.2024
 **/
 
@@ -48,16 +48,11 @@ String TQueMessage::Create()
 // ****************************************************************************
 // *                Сформировать простое сообщение, без уточнений             *
 // ****************************************************************************
-void TQueMessage::simpStruMess(String Type, int Number, String Source)
+void TQueMessage::simpStruMess(String Type, int Number)
 {
-   // Ограничиваем длину Source до 7 символов
-   String str;
-   if (Source.length()>7) str=Source.substring(0,7);
-   else str=Source;
    // Заполняем структуру
    strcpy(taskStruMess.Type, Type.c_str());                                
-   if (Source==isOk) strcpy(taskStruMess.Source, SourceMessage.c_str());  
-   else strcpy(taskStruMess.Source, str.c_str());                     
+   strcpy(taskStruMess.Source, SourceMessage.c_str());  
    taskStruMess.Number=Number;                                           
    strcpy(taskStruMess.fmess32, EmptyMessage.c_str());                   
    strcpy(taskStruMess.smess32, EmptyMessage.c_str()); 
@@ -80,6 +75,22 @@ void TQueMessage::f32StruMess(String Type, int Number, int fmess32, String Sourc
    strcpy(taskStruMess.smess32, EmptyMessage.c_str()); 
 };    
 // ****************************************************************************
+// *     Сформировать сообщение c одним уточнением типа String (31 символ)   *
+// ****************************************************************************
+void TQueMessage::f32sStruMess(String Type, int Number, String fmess32)
+{
+   // Заполняем структуру: tStruMessage.Type
+   strcpy(taskStruMess.Type, Type.c_str());   
+   // tStruMessage.Source 
+   strcpy(taskStruMess.Source, SourceMessage.c_str());  
+   // Заполняем структуру: tStruMessage.Number 
+   taskStruMess.Number=Number; 
+   // Заполняем структуру: tStruMessage.fmess32 (ограничиваем длину до 31 символа)
+   strcpy(taskStruMess.fmess32, fmess32.c_str()); 
+   // Заполняем структуру: tStruMessage.smess32
+   strcpy(taskStruMess.smess32, EmptyMessage.c_str()); 
+};    
+// ****************************************************************************
 // *           Сформировать сообщение c двумя уточнениями целого типа         *
 // ****************************************************************************
 void TQueMessage::fs32StruMess(String Type, int Number, int fmess32, int smess32, String Source)
@@ -95,7 +106,8 @@ void TQueMessage::fs32StruMess(String Type, int Number, int fmess32, int smess32
    taskStruMess.Number=Number;                                           
    sprintf(taskStruMess.fmess32, "%d", fmess32);                         
    sprintf(taskStruMess.smess32, "%d", smess32);
-};    
+}; 
+   
 // Макрос: отправить сообщение из задачи или основного цикла
 #define sendMess();                                                      \
    if (xQueueSend(tQueue,&taskStruMess,(TickType_t)0) != pdPASS)         \
@@ -106,7 +118,7 @@ void TQueMessage::fs32StruMess(String Type, int Number, int fmess32, int smess32
 // ****************************************************************************
 // * 1 группа сообщений:            Отправить просто сообщение, без уточнений *
 // ****************************************************************************
-String TQueMessage::Send(String Type, int Number, String Source)
+String TQueMessage::Send(String Type, int Number)
 {
    // Инициируем успешное сообщение
    String inMess=isOk;
@@ -114,7 +126,7 @@ String TQueMessage::Send(String Type, int Number, String Source)
    if (tQueue!=0)
    {
       // Формируем сообщение для передачи в очередь
-      simpStruMess(Type,Number,Source); 
+      simpStruMess(Type,Number); 
       // Отправляем сообщение
       sendMess();
    }
@@ -122,7 +134,7 @@ String TQueMessage::Send(String Type, int Number, String Source)
    else inMess=QueueNotSend;
    return inMess; 
 }
-String TQueMessage::SendISR(String Type,int Number,String Source) 
+String TQueMessage::SendISR(String Type,int Number) 
 {
    // Инициируем пустое сообщение
    String inMess=isOk;
@@ -130,7 +142,7 @@ String TQueMessage::SendISR(String Type,int Number,String Source)
    if (tQueue!=0)
    {
       // Формируем сообщение для передачи в очередь
-      simpStruMess(Type,Number,Source); 
+      simpStruMess(Type,Number); 
       // Сбрасываем признак переключения на более приоритетную задачу после прерывания 
       xHigherPriorityTaskWoken = pdFALSE;
       // Отправляем сообщение в структуре  
@@ -206,6 +218,24 @@ String TQueMessage::Send(String Type,int Number,int fmess32,int smess32,String S
    return inMess; 
 }
 // ****************************************************************************
+// *  4 группа:  Отправить сообщение c одним уточнением типа String (31 символ)
+// ****************************************************************************
+String TQueMessage::Send(String Type, int Number, String fmess32)
+{
+   // Инициируем пустое сообщение
+   String inMess=isOk;
+   // Если очередь создана, то отправляем сообщение в очередь
+   if (tQueue!=0)
+   {
+      // Формируем сообщение для передачи в очередь
+      f32sStruMess(Type, Number, fmess32);    
+      sendMess();
+   }
+   // Отмечаем "Отправка сообщения: очередь структур не создана!" 
+   else inMess=QueueNotSend;
+   return inMess; 
+}
+// ****************************************************************************
 // *          Извлечь информацию о текущем времени в отформатированном        *
 // *                виде с помощью struct tm структуры данных:                *
 // *                               https://cplusplus.com/reference/ctime/tm/  *
@@ -250,17 +280,26 @@ void TQueMessage::ExtractMess(String Source, int Number, String fmess32, String 
          // Выводим "простое сообщение, без уточнений"
          if (amessAPP[i].vmess==tvm_simpmes)
          { 
-            sprintf(tMess,amessAPP[i].cmess); break;
+            sprintf(tMess,amessAPP[i].cmess); 
+            break;                 
          }
          // Выводим "сообщение c одним уточнением целого типа"
          if (amessAPP[i].vmess==tvm_1intmes) 
          {
-            sprintf(tMess,amessAPP[i].cmess,fmess32); break;
+            sprintf(tMess,amessAPP[i].cmess,fmess32); 
+            break;                 
+         }
+         // Выводим "сообщение c уточнением типа String"
+         if (amessAPP[i].vmess==tvm_3strmes) 
+         {
+            sprintf(tMess,amessAPP[i].cmess,fmess32.c_str()); 
+            break;                 
          }
          // Выводим "сообщение c одним уточнением целого типа"
          if (amessAPP[i].vmess==tvm_2intmes) 
          {
-            sprintf(tMess,amessAPP[i].cmess,fmess32,smess32); break;
+            sprintf(tMess,amessAPP[i].cmess,fmess32,smess32); 
+            break;                  
          }
       }
    }
