@@ -18,15 +18,24 @@ Extensions=*.*
 [Project tree]
 TEsparTools
 	+TEsparTools
-		+examples
-			+QueueChar
+		-examples
+			-LwIPSNTP
+				examples\LwIPSNTP\LwIPSNTP.ino
+			-QueueChar
 				examples\QueueChar\QueueChar.ino
 			-QueueHandlMulti
 				examples\QueueHandlMulti\QHM_Message.h
 				examples\QueueHandlMulti\QueueHandlMulti.ino
 		-extras
+			extras\TAttachSNTP.md
+			extras\TQue.md
 			extras\TQueMessage.md
 		+src
+			src\AttachSNTP.cpp
+			src\AttachSNTP.h
+			src\ChipWiFi.h
+			src\Mems.cpp
+			src\Mems.h
 			src\QueChar.cpp
 			src\QueChar.h
 			src\QueMessage.cpp
@@ -47,7 +56,7 @@ Selected=src\QueChar.h
 TopLine=1
 Caret=1,1
 [src\QueChar.h]
-TopLine=1
+TopLine=41
 Caret=21,14
 [examples\QueueChar\QueueChar.ino]
 TopLine=17
