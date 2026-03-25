@@ -1,3 +1,12 @@
+/** Arduino-Esp32-CAM                                     *** QueueChar.ino ***
+ * 
+ *                        Пример передачи сообщения из задачи и из прерывания с
+ *                                                     приемом в основном цикле
+ * 
+ * v1.0.0, 23.12.2024                                 Автор:      Труфанов В.Е.
+ * Copyright © 2024 tve                               Дата создания: 23.12.2024
+**/
+
 
  // [1. Коды состояния ответа HTTP]
  // (https://developer.mozilla.org/ru/docs/Web/HTTP/Reference/Status)
@@ -42,6 +51,7 @@ typedef enum
 {
   [NetworkEvents.h](https://docs.espressif.com/projects/arduino-esp32/en/latest/api/network.html#network-events)
   [WiFi.h](https://espressif-docs.readthedocs-hosted.com/projects/arduino-esp32/en/latest/api/wifi.html)
+  [WiFi.onEvent](https://avantmaker.com/references/esp32-arduino-core-index/esp32-arduino-core-wifi/esp32-wifi-library-station-class/esp32-wifi-library-wifi-onevent/)
   **Важно**: обработчики событий `WiFiEvent` вызываются из отдельной задачи (потока) FreeRTOS. Функции получают два параметра: WiFiEvent_t event и WiFiEventInfo_t info.
   WiFiEvent_t представляет тип события Wi-Fi. WiFiEventInfo_t содержит информацию о событии в системе событий сети на базе ESP32, это объединение значений типа system_event_info_t. 
   В этом объединении есть структура, которая содержит данные о событии. Например, в структуре, соответствующей событию SYSTEM_EVENT_STA_CONNECTED, есть члены: 
@@ -199,12 +209,20 @@ void WiFiEvent(WiFiEvent_t event) {
 }
 */
 
+/*
 void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info) 
 {
   Serial.println("WiFi connected");
   Serial.println("IP address станции: ");
   //Serial.println(WiFi.localIP());
   //Serial.println(IPAddress(info.got_ip.ip_info.ip.addr));
+}
+*/
+
+void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(IPAddress(info.got_ip.ip_info.ip.addr));
 }
 
 void WiFiDiscon(WiFiEvent_t event, WiFiEventInfo_t info) 
@@ -213,25 +231,100 @@ void WiFiDiscon(WiFiEvent_t event, WiFiEventInfo_t info)
   //Serial.println(info.disconnected.reason);
 }
 
-void Podkl()
+void WiFiEvent(WiFiEvent_t event) 
 {
-  Serial.println("WiFi подключен");
-  Serial.print("IP собственной сети: ");  Serial.print(WiFi.softAPIP()); Serial.print("  "); Serial.println(soft_ap_ssid);
-  Serial.print("IP рабочей станции:  ");  Serial.print(WiFi.localIP());  Serial.print("  "); Serial.println(WiFi.SSID());
-  Serial.print("RSSI = "); Serial.println(WiFi.RSSI());
+  //Serial.printf("[WiFi-event] event: %d\n", event);
+  Serial.printf("[WiFi-event: %d] ", event);
+
+  switch (event) 
+  {
+    case ARDUINO_EVENT_WIFI_READY:               Serial.println("WiFi interface ready"); break;
+    case ARDUINO_EVENT_WIFI_SCAN_DONE:           Serial.println("Completed scan for access points"); break;
+    case ARDUINO_EVENT_WIFI_STA_START:           Serial.println("WiFi client started"); break;
+    case ARDUINO_EVENT_WIFI_STA_STOP:            Serial.println("WiFi clients stopped"); break;
+    case ARDUINO_EVENT_WIFI_STA_CONNECTED:       Serial.println("Connected to access point"); break;
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:    Serial.println("Disconnected from WiFi access point"); break;
+    case ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE: Serial.println("Authentication mode of access point has changed"); break;
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+      Serial.print("Obtained IP address: ");
+      Serial.println(WiFi.localIP());
+      break;
+    case ARDUINO_EVENT_WIFI_STA_LOST_IP:        Serial.println("Lost IP address and IP address is reset to 0"); break;
+    case ARDUINO_EVENT_WPS_ER_SUCCESS:          Serial.println("WiFi Protected Setup (WPS): succeeded in enrollee mode"); break;
+    case ARDUINO_EVENT_WPS_ER_FAILED:           Serial.println("WiFi Protected Setup (WPS): failed in enrollee mode"); break;
+    case ARDUINO_EVENT_WPS_ER_TIMEOUT:          Serial.println("WiFi Protected Setup (WPS): timeout in enrollee mode"); break;
+    case ARDUINO_EVENT_WPS_ER_PIN:              Serial.println("WiFi Protected Setup (WPS): pin code in enrollee mode"); break;
+    case ARDUINO_EVENT_WIFI_AP_START:           Serial.println("WiFi access point started"); break;
+    case ARDUINO_EVENT_WIFI_AP_STOP:            Serial.println("WiFi access point  stopped"); break;
+    case ARDUINO_EVENT_WIFI_AP_STACONNECTED:    Serial.println("Client connected"); break;
+    case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED: Serial.println("Client disconnected"); break;
+    case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED:   Serial.println("Assigned IP address to client"); break;
+    case ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED:  Serial.println("Received probe request"); break;
+    case ARDUINO_EVENT_WIFI_AP_GOT_IP6:         Serial.println("AP IPv6 is preferred"); break;
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP6:        Serial.println("STA IPv6 is preferred"); break;
+    case ARDUINO_EVENT_ETH_GOT_IP6:             Serial.println("Ethernet IPv6 is preferred"); break;
+    case ARDUINO_EVENT_ETH_START:               Serial.println("Ethernet started"); break;
+    case ARDUINO_EVENT_ETH_STOP:                Serial.println("Ethernet stopped"); break;
+    case ARDUINO_EVENT_ETH_CONNECTED:           Serial.println("Ethernet connected"); break;
+    case ARDUINO_EVENT_ETH_DISCONNECTED:        Serial.println("Ethernet disconnected"); break;
+    case ARDUINO_EVENT_ETH_GOT_IP:              Serial.println("Obtained IP address"); break;
+    default:                                    Serial.println("Неопределённое событие"); break;
+  }
+}
+
+
+static unsigned long currentMillis;  // текущее время в миллисекундах 
+static bool isConnected=false;       // состояние подключения к сети
+
+void KeepNet()
+{
+  // Ловим подключение WiFi
+  if (wifiMulti.run() == WL_CONNECTED) 
+  {
+    // Если первый раз подключились после разрыва, то выводим сообщения
+    if (!isConnected) 
+    {
+      Serial.println("WiFi подключен!");
+      Serial.print("IP собственной сети: ");  Serial.print(WiFi.softAPIP()); Serial.print("  "); Serial.println(soft_ap_ssid);
+      Serial.print("IP рабочей станции:  ");  Serial.print(WiFi.localIP());  Serial.print("  "); Serial.println(WiFi.SSID());
+      Serial.print("RSSI = "); Serial.println(WiFi.RSSI());
+      isConnected = true;
+    }
+  } 
+  else 
+  {
+    // Выводим сообщение об отключении 
+    Serial.println("WiFi отключился!");
+    isConnected = false;
+  }
 }
 
 void setup() 
 {
   Serial.begin(115200);
-  // delete old config
-  //WiFi.disconnect(true);
   delay(1000);
-  // Examples of different ways to register wifi events;
-  // these handlers will be called from another thread.
-  //WiFi.onEvent(WiFiEvent);
-  WiFi.onEvent(WiFiGotIP,  WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
-  WiFi.onEvent(WiFiDiscon, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+
+  // Включаем штатную обработку всех событий с WiFi
+  WiFi.onEvent(WiFiEvent);
+
+  /*
+  */
+
+  // Включаем прикладную обработку событий с WiFi через именные функции обратного вызова
+  WiFi.onEvent(WiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
+  // Включаем прикладную обработку событий с WiFi через безымянные лямбда-функции 
+  WiFiEventId_t eventID = WiFi.onEvent
+  (
+    [](WiFiEvent_t event, WiFiEventInfo_t info) 
+    {
+      Serial.print("Wi-Fi потерял связь. Причина: ");
+      Serial.println(info.wifi_sta_disconnected.reason);
+    },
+    WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED
+  );
+
+  //WiFi.onEvent(WiFiGotIP,  WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
+  //WiFi.onEvent(WiFiDiscon, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
   
   // Remove WiFi event
   //Serial.print("WiFi Event ID: ");
@@ -246,7 +339,7 @@ void setup()
   //wifiMulti.addAP("tve-DESKTOP",   "Ue18-647");
   wifiMulti.addAP("OPPO A9 2020",  "b277a4ee84e8");
   wifiMulti.addAP("tve-MONOBLOCK", "Ue18-647");
-  //wifiMulti.addAP("linksystve",    "X93K6KQ6WF");
+  wifiMulti.addAP("linksystve",    "X93K6KQ6WF");
   //wifiMulti.addAP("GoshaIMila",    "t1s2wde4bE");
 
   // These options can help when you need ANY kind of wifi connection to get a config file, report errors, etc.
@@ -256,9 +349,7 @@ void setup()
 
   // Отключаем режим сна (modem sleep). 
   WiFi.setSleep(false);
-  Serial.print("Подключение к WiFi ");
-  if (wifiMulti.run()) Podkl();
-  else Serial.println("В setup не подключились");
+  Serial.println("Подключение к WiFi в SETUP"); KeepNet();
   /*
   while (wifiMulti.run() != WL_CONNECTED) 
   {
@@ -267,42 +358,170 @@ void setup()
   }
   Serial.println("");
   */
+  // Начинаем отсчет временных интервалов для сообщений в loop()
+  currentMillis = millis();
 }
 
 void loop() 
 {
-  static bool isConnected;
-  /*
-  uint8_t WiFiStatus = wifiMulti.run();
-  if (wifiMulti.run() == WL_CONNECTED) 
-  {
-    if (!isConnected) 
-    {
-      Serial.println("");
-      Serial.println("WiFi connected");
-      Serial.println("IP address: ");
-      Serial.println(WiFi.localIP());
-    }
-    isConnected = true;
-  } 
-  else 
-  {
-    Serial.println("WiFi not connected!");
-    isConnected = false;
-    delay(5000);
-  }
-  */
-  if (wifiMulti.run() == WL_CONNECTED) 
-  {
-    Podkl();
-    Serial.println("В loop подключились");
-    isConnected = true;
-  } 
-  else 
-  {
-    Serial.println("WiFi отключился!");
-    isConnected = false;
-  }
-  delay(5000);
-  Serial.println("=5000!");
+  KeepNet();
+  // Выводим контрольное сообщение после каждых 5 минут
+  if ((millis()-currentMillis) > 5000) 
+  { 
+    Serial.println("+5000!");
+    currentMillis = millis();
+  }  
+  // Делаем паузу для очистки мусора
+  // (здесь две секунды, чтобы выводилась трассировка об отключении не часто,
+  // в живых проектах лучше паузу делать меньше, например, 100 мс)
+  delay(2000);
 }
+
+/*
+/ *
+ * Author: Avant Maker
+ * Date (MM-DD-YY): 02-06-25
+ * Version: 1.0
+ * Description: This code demonstrates how to use the onEvent method
+ * from the ESP32 WiFi Library to handle various WiFi-related events. 
+ * It showcases the registration of multiple event callbacks to monitor 
+ * and respond to different WiFi states and activities.
+ * 
+ * Code Source: ESP32 Arduino Library Example Code 
+ * 
+ * For more detailed explaination about 
+ * this code please refer to the Comprehensive Guide
+ * to the ESP32 Arduino Core Library, accessible on AvantMaker.com. 
+ * For additional code examples and in-depth documentation related to 
+ * the ESP32 Arduino Core Library, please visit:
+ *
+ * https://avantmaker.com/references/esp32-arduino-core-index/
+ *
+ * AvantMaker.com, your premier destination for all things DIY, AI, IoT, 
+ * Smart Home, and STEM projects. We are dedicated to empowering makers,
+ * learners, and enthusiasts with the resources they need to bring their 
+ * innovative ideas to life.
+ * /
+
+/ *
+* WiFi Events
+
+0  ARDUINO_EVENT_WIFI_READY               < ESP32 WiFi ready
+1  ARDUINO_EVENT_WIFI_SCAN_DONE                < ESP32 finish scanning AP
+2  ARDUINO_EVENT_WIFI_STA_START                < ESP32 station start
+3  ARDUINO_EVENT_WIFI_STA_STOP                 < ESP32 station stop
+4  ARDUINO_EVENT_WIFI_STA_CONNECTED            < ESP32 station connected to AP
+5  ARDUINO_EVENT_WIFI_STA_DISCONNECTED         < ESP32 station disconnected from AP
+6  ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE      < the auth mode of AP connected by ESP32 station changed
+7  ARDUINO_EVENT_WIFI_STA_GOT_IP               < ESP32 station got IP from connected AP
+8  ARDUINO_EVENT_WIFI_STA_LOST_IP              < ESP32 station lost IP and the IP is reset to 0
+9  ARDUINO_EVENT_WPS_ER_SUCCESS       < ESP32 station wps succeeds in enrollee mode
+10 ARDUINO_EVENT_WPS_ER_FAILED        < ESP32 station wps fails in enrollee mode
+11 ARDUINO_EVENT_WPS_ER_TIMEOUT       < ESP32 station wps timeout in enrollee mode
+12 ARDUINO_EVENT_WPS_ER_PIN           < ESP32 station wps pin code in enrollee mode
+13 ARDUINO_EVENT_WIFI_AP_START                 < ESP32 soft-AP start
+14 ARDUINO_EVENT_WIFI_AP_STOP                  < ESP32 soft-AP stop
+15 ARDUINO_EVENT_WIFI_AP_STACONNECTED          < a station connected to ESP32 soft-AP
+16 ARDUINO_EVENT_WIFI_AP_STADISCONNECTED       < a station disconnected from ESP32 soft-AP
+17 ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED         < ESP32 soft-AP assign an IP to a connected station
+18 ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED        < Receive probe request packet in soft-AP interface
+19 ARDUINO_EVENT_WIFI_AP_GOT_IP6               < ESP32 ap interface v6IP addr is preferred
+19 ARDUINO_EVENT_WIFI_STA_GOT_IP6              < ESP32 station interface v6IP addr is preferred
+20 ARDUINO_EVENT_ETH_START                < ESP32 ethernet start
+21 ARDUINO_EVENT_ETH_STOP                 < ESP32 ethernet stop
+22 ARDUINO_EVENT_ETH_CONNECTED            < ESP32 ethernet phy link up
+23 ARDUINO_EVENT_ETH_DISCONNECTED         < ESP32 ethernet phy link down
+24 ARDUINO_EVENT_ETH_GOT_IP               < ESP32 ethernet got IP from connected AP
+19 ARDUINO_EVENT_ETH_GOT_IP6              < ESP32 ethernet interface v6IP addr is preferred
+25 ARDUINO_EVENT_MAX
+* /
+
+#include <WiFi.h>
+
+const char *ssid = "your-ssid";
+const char *password = "your-password";
+
+// WARNING: This function is called from a separate FreeRTOS task (thread)!
+void WiFiEvent(WiFiEvent_t event) {
+  Serial.printf("[WiFi-event] event: %d\n", event);
+
+  switch (event) {
+    case ARDUINO_EVENT_WIFI_READY:               Serial.println("WiFi interface ready"); break;
+    case ARDUINO_EVENT_WIFI_SCAN_DONE:           Serial.println("Completed scan for access points"); break;
+    case ARDUINO_EVENT_WIFI_STA_START:           Serial.println("WiFi client started"); break;
+    case ARDUINO_EVENT_WIFI_STA_STOP:            Serial.println("WiFi clients stopped"); break;
+    case ARDUINO_EVENT_WIFI_STA_CONNECTED:       Serial.println("Connected to access point"); break;
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:    Serial.println("Disconnected from WiFi access point"); break;
+    case ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE: Serial.println("Authentication mode of access point has changed"); break;
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+      Serial.print("Obtained IP address: ");
+      Serial.println(WiFi.localIP());
+      break;
+    case ARDUINO_EVENT_WIFI_STA_LOST_IP:        Serial.println("Lost IP address and IP address is reset to 0"); break;
+    case ARDUINO_EVENT_WPS_ER_SUCCESS:          Serial.println("WiFi Protected Setup (WPS): succeeded in enrollee mode"); break;
+    case ARDUINO_EVENT_WPS_ER_FAILED:           Serial.println("WiFi Protected Setup (WPS): failed in enrollee mode"); break;
+    case ARDUINO_EVENT_WPS_ER_TIMEOUT:          Serial.println("WiFi Protected Setup (WPS): timeout in enrollee mode"); break;
+    case ARDUINO_EVENT_WPS_ER_PIN:              Serial.println("WiFi Protected Setup (WPS): pin code in enrollee mode"); break;
+    case ARDUINO_EVENT_WIFI_AP_START:           Serial.println("WiFi access point started"); break;
+    case ARDUINO_EVENT_WIFI_AP_STOP:            Serial.println("WiFi access point  stopped"); break;
+    case ARDUINO_EVENT_WIFI_AP_STACONNECTED:    Serial.println("Client connected"); break;
+    case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED: Serial.println("Client disconnected"); break;
+    case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED:   Serial.println("Assigned IP address to client"); break;
+    case ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED:  Serial.println("Received probe request"); break;
+    case ARDUINO_EVENT_WIFI_AP_GOT_IP6:         Serial.println("AP IPv6 is preferred"); break;
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP6:        Serial.println("STA IPv6 is preferred"); break;
+    case ARDUINO_EVENT_ETH_GOT_IP6:             Serial.println("Ethernet IPv6 is preferred"); break;
+    case ARDUINO_EVENT_ETH_START:               Serial.println("Ethernet started"); break;
+    case ARDUINO_EVENT_ETH_STOP:                Serial.println("Ethernet stopped"); break;
+    case ARDUINO_EVENT_ETH_CONNECTED:           Serial.println("Ethernet connected"); break;
+    case ARDUINO_EVENT_ETH_DISCONNECTED:        Serial.println("Ethernet disconnected"); break;
+    case ARDUINO_EVENT_ETH_GOT_IP:              Serial.println("Obtained IP address"); break;
+    default:                                    break;
+  }
+}
+
+// WARNING: This function is called from a separate FreeRTOS task (thread)!
+void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(IPAddress(info.got_ip.ip_info.ip.addr));
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  // delete old config
+  WiFi.disconnect(true);
+
+  delay(1000);
+
+  // Examples of different ways to register wifi events;
+  // these handlers will be called from another thread.
+  WiFi.onEvent(WiFiEvent);
+  WiFi.onEvent(WiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
+  WiFiEventId_t eventID = WiFi.onEvent(
+    [](WiFiEvent_t event, WiFiEventInfo_t info) {
+      Serial.print("WiFi lost connection. Reason: ");
+      Serial.println(info.wifi_sta_disconnected.reason);
+    },
+    WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED
+  );
+
+  // Remove WiFi event
+  Serial.print("WiFi Event ID: ");
+  Serial.println(eventID);
+  // WiFi.removeEvent(eventID);
+
+  WiFi.begin(ssid, password);
+
+  Serial.println();
+  Serial.println();
+  Serial.println("Wait for WiFi... ");
+}
+
+void loop() {
+  delay(1000);
+}
+
+
+*/
