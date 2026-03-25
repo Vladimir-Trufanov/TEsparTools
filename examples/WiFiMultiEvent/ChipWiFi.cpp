@@ -15,13 +15,71 @@
 WiFiMulti chipWiFi;
 
 // ****************************************************************************
-// *                  Построить объект (конструктор класса)                   *
+// *                    Объявить объект (конструктор класса)                  *
 // ****************************************************************************
 TChipWiFi::TChipWiFi()
 {
 }
 // ****************************************************************************
-// *                       ---- Создать очередь сообщений                         *
+// *    Проверить подключения к Интернету (функция обратного вызова класса)   *
+// ****************************************************************************
+bool testConnection() 
+{
+  HTTPClient http;
+  http.begin("http://www.espressif.com");
+  int httpCode = http.GET();
+  // Ожидаем статус ответа, как 301, так как предполагается переадресация на HTTPS вместо HTTP
+  if (httpCode == HTTP_CODE_MOVED_PERMANENTLY) 
+  {
+    return true;
+  }
+  return false;
+}
+// ****************************************************************************
+// *   ------------------- Проверить подключения к Интернету (функция обратного вызова класса)   *
+// ****************************************************************************
+void WiFiEvent(WiFiEvent_t event) 
+{
+  Serial.printf("[WiFi-event: %d] ", event);
+
+  switch (event) 
+  {
+    case ARDUINO_EVENT_WIFI_READY:               Serial.println("WiFi interface ready"); break;
+    case ARDUINO_EVENT_WIFI_SCAN_DONE:           Serial.println("Completed scan for access points"); break;
+    case ARDUINO_EVENT_WIFI_STA_START:           Serial.println("WiFi client started"); break;
+    case ARDUINO_EVENT_WIFI_STA_STOP:            Serial.println("WiFi clients stopped"); break;
+    case ARDUINO_EVENT_WIFI_STA_CONNECTED:       Serial.println("Connected to access point"); break;
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:    Serial.println("Disconnected from WiFi access point"); break;
+    case ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE: Serial.println("Authentication mode of access point has changed"); break;
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+      Serial.print("Obtained IP address: ");
+      Serial.println(WiFi.localIP());
+      break;
+    case ARDUINO_EVENT_WIFI_STA_LOST_IP:        Serial.println("Lost IP address and IP address is reset to 0"); break;
+    case ARDUINO_EVENT_WPS_ER_SUCCESS:          Serial.println("WiFi Protected Setup (WPS): succeeded in enrollee mode"); break;
+    case ARDUINO_EVENT_WPS_ER_FAILED:           Serial.println("WiFi Protected Setup (WPS): failed in enrollee mode"); break;
+    case ARDUINO_EVENT_WPS_ER_TIMEOUT:          Serial.println("WiFi Protected Setup (WPS): timeout in enrollee mode"); break;
+    case ARDUINO_EVENT_WPS_ER_PIN:              Serial.println("WiFi Protected Setup (WPS): pin code in enrollee mode"); break;
+    case ARDUINO_EVENT_WIFI_AP_START:           Serial.println("WiFi access point started"); break;
+    case ARDUINO_EVENT_WIFI_AP_STOP:            Serial.println("WiFi access point  stopped"); break;
+    case ARDUINO_EVENT_WIFI_AP_STACONNECTED:    Serial.println("Client connected"); break;
+    case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED: Serial.println("Client disconnected"); break;
+    case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED:   Serial.println("Assigned IP address to client"); break;
+    case ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED:  Serial.println("Received probe request"); break;
+    case ARDUINO_EVENT_WIFI_AP_GOT_IP6:         Serial.println("AP IPv6 is preferred"); break;
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP6:        Serial.println("STA IPv6 is preferred"); break;
+    case ARDUINO_EVENT_ETH_GOT_IP6:             Serial.println("Ethernet IPv6 is preferred"); break;
+    case ARDUINO_EVENT_ETH_START:               Serial.println("Ethernet started"); break;
+    case ARDUINO_EVENT_ETH_STOP:                Serial.println("Ethernet stopped"); break;
+    case ARDUINO_EVENT_ETH_CONNECTED:           Serial.println("Ethernet connected"); break;
+    case ARDUINO_EVENT_ETH_DISCONNECTED:        Serial.println("Ethernet disconnected"); break;
+    case ARDUINO_EVENT_ETH_GOT_IP:              Serial.println("Obtained IP address"); break;
+    default:                                    Serial.println("Неопределённое событие"); break;
+  }
+}
+
+// ****************************************************************************
+// *                        Построить объект класса                           *
 // ****************************************************************************
 String TChipWiFi::Create()
 {
@@ -31,12 +89,40 @@ String TChipWiFi::Create()
   chipWiFi.addAP("OPPO A9 2020",  "b277a4ee84e8");
   chipWiFi.addAP("tve-MONOBLOCK", "Ue18-647");
   chipWiFi.addAP("linksystve",    "X93K6KQ6WF");
+
+  // Отключаем строгий режим процесса подключения к сети WiFi
+  // (если строгий режим включён setStrictMode(true), ESP32 прекращает попытки подключиться к дополнительным сетям,
+  // как только успешно устанавливает соединение с первой доступной сетью из списка. Это обеспечивает более быстрое 
+  // установление соединения, избегая ненужных попыток на другие сети; если строгий режим отключён setStrictMode(false), 
+  // ESP32 может продолжать искать и пытаться подключиться к другим сетям в списке после установления соединения. 
+  // Это полезно в сценариях, где нужно, чтобы устройство потенциально переключалось на лучшую сеть, если текущее 
+  // соединение потеряно или неоптимально.
+  chipWiFi.setStrictMode(false); 
+  // Запрещаем подключения к открытым (незащищённым) точкам доступа
+  chipWiFi.setAllowOpenAP(false);
+  // Настраиваем вызов пользовательской функции (callback) для проверки достоверности соединения 
+  // (синтаксис: chipWiFi.setConnectionTestCallbackFunc(callbackFunction). Аргумент callbackFunction — указатель на 
+  // функцию типа ConnectionTestCB_t, который является typedef для std::function. Это пользовательская функция, которая 
+  // возвращает значение bool. Она вызывается после подключения к AP для проверки достоверности соединения (например, 
+  // доступности интернета). Функция должна возвращать true, если соединение соответствует критериям, или false, 
+  // чтобы вызвать переход к другой AP. Метод не возвращает значение (тип возврата — void). Он настраивает объект WiFiMulti 
+  // на использование предоставленной функции-обратного вызова во время попыток подключения)
+  chipWiFi.setConnectionTestCallbackFunc(testConnection);  // Attempts to connect to a remote webserver in case of captive portals.
+  // Отключаем режим сна (modem sleep). 
+  WiFi.setSleep(false);
+
+  // Включаем штатную обработку всех событий с WiFi
+  WiFi.onEvent(WiFiEvent);
+
+
+
+
   // Подключаем станцию к WiFi  
   Keep();
 
 
    // Инициируем успешное сообщение
-   String inMess="tisOk";
+   String inMess="tiыыsOk";
    //tQueue = xQueueCreate(QueueSize, sizeof(struct tStruMess));
    // Возвращаем ошибку "Очередь не была создана и не может использоваться" 
    //if (tQueue==NULL) inMess=tQueueNotCreate; 
@@ -66,154 +152,5 @@ void TChipWiFi::Keep()
     isConnected = false;
   }
 }
-
-
-/*
-
-// ****************************************************************************
-// *  Скопировать не более 1023 символов сообщения в буфер и завершить нулем  *
-// ****************************************************************************
-void TQue::strcopy1024(String Source)
-{
-   const char* message_ptr = Source.c_str();
-   int i=0;
-   while(message_ptr[i]>0)
-   {
-      taskStruMess.mess[i]=message_ptr[i];
-      i++;
-      if (i>1022) break;
-   }
-   taskStruMess.mess[i]=0;
-}
-// ****************************************************************************
-// *                          Отправить сообщение из задачи                   *
-// ****************************************************************************
-String TQue::Send(String Source)
-{
-   // Инициируем успешное сообщение
-   String inMess=tisOk;
-   // Если очередь создана, то отправляем сообщение в очередь
-   if (tQueue!=0)
-   {
-      strcopy1024(Source);
-      if (xQueueSend(tQueue,&taskStruMess,(TickType_t)0) != pdPASS)        
-      {                                                                    
-         sprintf(tBuffer,tFailSend);                                         
-         inMess=String(tBuffer);                                           
-      }
-   }
-   // Отмечаем "Отправка сообщения: очередь структур не создана!" 
-   else inMess=tQueueNotSend;
-   return inMess; 
-}
-String TQue::SendISR(String Source) 
-{
-   // Инициируем пустое сообщение
-   String inMess=tisOk;
-   // Если очередь создана, то отправляем сообщение в очередь
-   if (tQueue!=0)
-   {
-      // Формируем сообщение для передачи в очередь
-      strcopy1024(Source);
-      // Сбрасываем признак переключения на более приоритетную задачу после прерывания 
-      xHigherPriorityTaskWoken = pdFALSE;
-      // Отправляем сообщение в структуре  
-      if (xQueueSendFromISR(tQueue,&taskStruMess,&xHigherPriorityTaskWoken) != pdPASS)
-      {
-         // Если "Не удалось отправить структуру из прерывания!" 
-         sprintf(tBuffer,tFailSendInrupt); 
-         inMess=String(tBuffer);
-      }
-   }
-   // Отмечаем "Отправка сообщения: очередь структур не создана!" 
-   else inMess=tQueueNotSend;
-   return inMess; 
-}
-// ****************************************************************************
-// *        Подключить внешнюю функцию передачи сообщения на периферию        *
-// ****************************************************************************
-void TQue::attachFunction(void (*function)(char *mess, char *prefix)) 
-{
-   atatchedF = *function;  
-}
-// ****************************************************************************
-// *            Определить, сколько сообщений накопилось в очереди            *
-// *                            и их можно выгрузить                          *
-// ****************************************************************************
-int TQue::How_many_wait()                 
-{
-   // Инициируем отсутствие массива очереди
-   int nMess = -1; 
-   // Если очередь создана, то возвращаем количество сообщений в очереди
-   if (tQueue!=NULL) nMess = int(uxQueueMessagesWaiting(tQueue)); 
-   return nMess;     
-}
-// ****************************************************************************
-// *              Определить количество свободных мест в очереди              *
-// ****************************************************************************
-int TQue::How_many_free() 
-{               
-   // Инициируем отсутствие массива очереди
-   int Space = -1; 
-   // Если очередь создана, то возвращаем количество свободных мест в очереди
-   if (tQueue!=NULL) Space = int(uxQueueSpacesAvailable(tQueue)); 
-   return Space;     
-}
-// ****************************************************************************
-// *                              Принять сообщение                           *
-// ****************************************************************************
-char* TQue::Receive()
-{
-   // Принимаем сообщение
-   if (tQueue!=NULL)
-   {
-      // Определяем сколько сообщений накопилось в очереди и их можно выгрузить              
-      int nMess = How_many_wait();
-      // Если есть сообщение в очереди, то выбираем одно сообщение
-      // (без блокировки задачи при пустой очереди)
-      if (nMess>0)
-      {
-         // Чистим буфер сообщения
-         sprintf(tBuffer,""); 
-         // Если сообщение выбралось из очереди успешно, то собираем его в буфер
-         if (xQueueReceive(tQueue,&receiveStruMess,(TickType_t )0)==pdPASS) 
-         {        
-            strcat(tBuffer, receiveStruMess.mess);
-         }
-         // Иначе отмечаем, что "Ошибка при приёме сообщения из очереди"  
-         else sprintf(tBuffer,tErrorReceiving); 
-      }
-      // Отмечаем, что "Очередь пуста при приёме сообщения" 
-      else if (nMess==0) sprintf(tBuffer,tQueueEmptyReceive); 
-      // "Не может быть!"
-      else sprintf(tBuffer,"Не может быть: TQueMessage::Receive!");
-   }
-   // Отмечаем "Прием сообщения: очередь структур не создана"
-   else sprintf(tBuffer,tNoQueueReceive); 
-   return tBuffer; 
-}
-// ****************************************************************************
-// *          Выбрать сообщение из очереди и отправить на периферию           *
-// ****************************************************************************
-char* TQue::Post(char *prefix)
-{
-   Receive(); 
-   if (String(tBuffer)!=tQueueEmptyReceive) (*atatchedF)(tBuffer,prefix); 
-   return tBuffer; 
-}
-// ****************************************************************************
-// *      Выбрать все сообщения разом из очереди и отправить на периферию     *
-// ****************************************************************************
-void TQue::PostAll(char *prefix)
-{
-   int iwait=How_many_wait();
-   while(iwait>0)
-   {
-      Receive(); 
-      if (String(tBuffer)!=tQueueEmptyReceive) (*atatchedF)(tBuffer,prefix); 
-      iwait=How_many_wait();
-   }
-}
-*/
 
 // ************************************************************ ChipWiFi.cpp ***
