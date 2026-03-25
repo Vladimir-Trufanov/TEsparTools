@@ -1,10 +1,10 @@
 /** Arduino-Esp32-CAM                                     *** QueueChar.ino ***
  * 
- *                        Пример передачи сообщения из задачи и из прерывания с
+ *                        -----Пример передачи сообщения из задачи и из прерывания с
  *                                                     приемом в основном цикле
  * 
- * v1.0.0, 23.12.2024                                 Автор:      Труфанов В.Е.
- * Copyright © 2024 tve                               Дата создания: 23.12.2024
+ * v1.0.1, 25.03.2026                                 Автор:      Труфанов В.Е.
+ * Copyright © 2024 tve                               Дата создания: 23.03.2026
 **/
 
 
@@ -19,14 +19,20 @@
 // "Контроллер №1" - камера для съёмок на природе   ["DachaSad"]
 // "ESP_75C391"    - ESP32-CAM, контроллер №3       ["NaDorogu"]
 // "ESP_A7E119"    - ESP32-CAM, контроллер №6 
-#define soft_ap_ssid "DachaSad" 
-
+//#define soft_ap_ssid "DachaSad" 
 
 #include <WiFi.h>
 #include <WiFiMulti.h>
 #include <HTTPClient.h>
 
-WiFiMulti wifiMulti;
+
+// ---Подключаем файлы обеспечения передачи и приёма сообщений через очередь                //
+#include "ChipWiFi.h"     // з----аголовочный файл класса TQueMessage                         //
+// Назначаем объект работы с сообщениями через очередь                                   //
+TChipWiFi chMulti;                                                                           //
+
+
+//WiFiMulti wifiMulti;
 
 // callback used to check Internet connectivity
 bool testConnection() 
@@ -274,10 +280,11 @@ void WiFiEvent(WiFiEvent_t event)
 
 
 static unsigned long currentMillis;  // текущее время в миллисекундах 
-static bool isConnected=false;       // состояние подключения к сети
+//static bool isConnected=false;       // состояние подключения к сети
 
 void KeepNet()
 {
+  /*
   // Ловим подключение WiFi
   if (wifiMulti.run() == WL_CONNECTED) 
   {
@@ -297,6 +304,7 @@ void KeepNet()
     Serial.println("WiFi отключился!");
     isConnected = false;
   }
+  */
 }
 
 void setup() 
@@ -304,13 +312,13 @@ void setup()
   Serial.begin(115200);
   delay(1000);
 
+  Serial.println(chMulti.Create());
+
+  /*
   // Включаем штатную обработку всех событий с WiFi
   WiFi.onEvent(WiFiEvent);
 
-  /*
-  */
-
-  // Включаем прикладную обработку событий с WiFi через именные функции обратного вызова
+   // Включаем прикладную обработку событий с WiFi через именные функции обратного вызова
   WiFi.onEvent(WiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
   // Включаем прикладную обработку событий с WiFi через безымянные лямбда-функции 
   WiFiEventId_t eventID = WiFi.onEvent
@@ -350,6 +358,9 @@ void setup()
   // Отключаем режим сна (modem sleep). 
   WiFi.setSleep(false);
   Serial.println("Подключение к WiFi в SETUP"); KeepNet();
+  */
+
+
   /*
   while (wifiMulti.run() != WL_CONNECTED) 
   {
@@ -364,7 +375,8 @@ void setup()
 
 void loop() 
 {
-  KeepNet();
+  // Удерживаем подключение станции к WiFi 
+  chMulti.Keep();
   // Выводим контрольное сообщение после каждых 5 минут
   if ((millis()-currentMillis) > 5000) 
   { 

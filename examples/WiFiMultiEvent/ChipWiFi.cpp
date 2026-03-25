@@ -1,10 +1,10 @@
 /** Arduino, Esp32 ******************************************* ChipWiFi.cpp ***
  * 
- *                          Обеспечить передачу и приём сообщений через очередь 
+ *                          ------Обеспечить передачу и приём сообщений через очередь 
  *                                                   в задачах и из прерываниях
  * 
- * v1.0.0, 23.12.2024                                 Автор:      Труфанов В.Е.
- * Copyright © 2024 tve                               Дата создания: 23.12.2024
+ * v1.0.1, 25.03.2026                                 Автор:      Труфанов В.Е.
+ * Copyright © 2024 tve                               Дата создания: 23.03.2026
 **/
 
 #include "Arduino.h"
@@ -12,27 +12,64 @@
 // Подключаем файлы обеспечения передачи и приёма сообщений через очередь 
 #include "ChipWiFi.h"
 
-/*
+WiFiMulti chipWiFi;
+
 // ****************************************************************************
 // *                  Построить объект (конструктор класса)                   *
 // ****************************************************************************
-TQue::TQue(int iQueueSize)
+TChipWiFi::TChipWiFi()
 {
-   // Определяем размер очереди из структур 
-   QueueSize=iQueueSize;
 }
 // ****************************************************************************
-// *                        Создать очередь сообщений                         *
+// *                       ---- Создать очередь сообщений                         *
 // ****************************************************************************
-String TQue::Create()
+String TChipWiFi::Create()
 {
+  WiFi.mode(WIFI_MODE_APSTA);
+  // Создаём собственную сеть
+  WiFi.softAP(soft_ap_ssid,soft_ap_ssid);
+  chipWiFi.addAP("OPPO A9 2020",  "b277a4ee84e8");
+  chipWiFi.addAP("tve-MONOBLOCK", "Ue18-647");
+  chipWiFi.addAP("linksystve",    "X93K6KQ6WF");
+  // Подключаем станцию к WiFi  
+  Keep();
+
+
    // Инициируем успешное сообщение
-   String inMess=tisOk;
-   tQueue = xQueueCreate(QueueSize, sizeof(struct tStruMess));
+   String inMess="tisOk";
+   //tQueue = xQueueCreate(QueueSize, sizeof(struct tStruMess));
    // Возвращаем ошибку "Очередь не была создана и не может использоваться" 
-   if (tQueue==NULL) inMess=tQueueNotCreate; 
+   //if (tQueue==NULL) inMess=tQueueNotCreate; 
    return inMess;
 };
+// ****************************************************************************
+// *                 Удерживать подключение станции к WiFi                    *
+// ****************************************************************************
+void TChipWiFi::Keep()
+{
+  if (chipWiFi.run() == WL_CONNECTED) 
+  {
+    // Если первый раз подключились после разрыва, то выводим сообщения
+    if (!isConnected) 
+    {
+      Serial.println("WiFi подключен!");
+      Serial.print("IP собственной сети: ");  Serial.print(WiFi.softAPIP()); Serial.print("  "); Serial.println(soft_ap_ssid);
+      Serial.print("IP рабочей станции:  ");  Serial.print(WiFi.localIP());  Serial.print("  "); Serial.println(WiFi.SSID());
+      Serial.print("RSSI = "); Serial.println(WiFi.RSSI());
+      isConnected = true;
+    }
+  } 
+  else 
+  {
+    // Выводим сообщение об отключении 
+    Serial.println("WiFi отключился!");
+    isConnected = false;
+  }
+}
+
+
+/*
+
 // ****************************************************************************
 // *  Скопировать не более 1023 символов сообщения в буфер и завершить нулем  *
 // ****************************************************************************
