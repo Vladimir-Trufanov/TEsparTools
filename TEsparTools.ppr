@@ -18,7 +18,7 @@ Extensions=*.*
 [Project tree]
 TEsparTools
 	+TEsparTools
-		+examples
+		-examples
 			-LwIPSNTP
 				examples\LwIPSNTP\LwIPSNTP.ino
 			-QueueChar
@@ -26,9 +26,7 @@ TEsparTools
 			-QueueHandlMulti
 				examples\QueueHandlMulti\QHM_Message.h
 				examples\QueueHandlMulti\QueueHandlMulti.ino
-			+WiFiMultiEvent
-				examples\WiFiMultiEvent\ChipWiFi.h
-				examples\WiFiMultiEvent\ci.yml
+			-WiFiMultiEvent
 				examples\WiFiMultiEvent\DefWiFi.h
 				examples\WiFiMultiEvent\WiFiMultiEvent.ino
 		-extras
@@ -38,6 +36,7 @@ TEsparTools
 		-src
 			src\AttachSNTP.cpp
 			src\AttachSNTP.h
+			src\ChipWiFi.h
 			src\Mems.cpp
 			src\Mems.h
 			src\QueChar.cpp
@@ -48,28 +47,25 @@ TEsparTools
 		library.properties
 		LICENSE
 		README.md
+		README.md.backup
 		TEsparTools.ppr
 [Open project files]
 0=examples\WiFiMultiEvent\WiFiMultiEvent.ino
-1=examples\WiFiMultiEvent\ChipWiFi.h
-2=examples\WiFiMultiEvent\DefWiFi.h
-3=library.properties
-4=keywords.txt
+1=examples\WiFiMultiEvent\DefWiFi.h
+2=library.properties
+3=src\ChipWiFi.h
 [Selected Project Files]
 Main=
-Selected=keywords.txt
+Selected=src\ChipWiFi.h
 [examples\WiFiMultiEvent\WiFiMultiEvent.ino]
-TopLine=27
+TopLine=25
 Caret=1,48
-[examples\WiFiMultiEvent\ChipWiFi.h]
-TopLine=57
-Caret=20,63
 [examples\WiFiMultiEvent\DefWiFi.h]
 TopLine=1
 Caret=1,20
 [library.properties]
 TopLine=1
-Caret=102,6
-[keywords.txt]
-TopLine=14
-Caret=16,41
+Caret=14,2
+[src\ChipWiFi.h]
+TopLine=1
+Caret=21,12
