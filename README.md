@@ -1,4 +1,4 @@
-# [TEsparTools, v3.3.0]() 09.03.2025 
+# [TEsparTools, v3.4.0](https://github.com/Vladimir-Trufanov/TEsparTools) 26.03.2026 
 
 Библиотека прикладных классов и функций в IDE Arduino для ESP. Как правило, модули библиотеки опираются на операционную систему ***FreeRTOS***.
 
@@ -16,16 +16,20 @@
 
 ```
 name=TEsparTools
-version=3.3.0
+version=3.4.0
 author=Труфанов Владимир Евгеньевич, tve@karelia.ru, <tve58@inbox.ru>
 maintainer=Trufanov Vladimir https://doortry.ru/kroshki-opyta/
-sentence=Library of application classes and functions ESP32-FreeRTOS on IDE Arduino 1.8.19+
-paragraph=Библиотека прикладных классов и функций в IDE Arduino 1.8.19+, Espressif Systems 3.0.5+
+sentence=Library of application classes and functions ESP32-FreeRTOS on IDE Arduino 1.8.19+, 2.3.8
+paragraph=Библиотека прикладных классов и функций в IDE Arduino 1.8.19+, 2.3.8, Espressif Systems 3.3.5+
 category=Device Control
 url=https://github.com/Vladimir-Trufanov/TEsparTools
 architectures=*
 ```
 ### Обновления
+
+#### v3.4.0, 26.03.2026
+
+Добавлен класс TChipWiFi - Обеспечить поиск и подключение к одной из локальных сетей WiFi в соответствии с массивом учетных записей возможных локальных сетей  с учётом событий и создание собственной сети контроллера
 
 #### v3.3.0, 09.03.2025
 

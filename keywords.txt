@@ -17,6 +17,7 @@ receiveStruMess	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
+Keep	KEYWORD2
 Create		KEYWORD2
 Send		KEYWORD2
 SendISR		KEYWORD2
@@ -37,6 +38,7 @@ getsynchromin	KEYWORD2
 # Structures (KEYWORD3)
 #######################################
 
+testConnection KEYWORD3
 tStruMessage			KEYWORD3 
 tStruMess   KEYWORD3
 xHigherPriorityTaskWoken	KEYWORD3	  
@@ -52,6 +54,8 @@ transQue KEYWORD2
 # Constants (LITERAL1)
 #######################################
 
+soft_ap_ssid LITERAL1
+soft_ap_pass LITERAL1
 QueueSize	LITERAL1
 tBuffer		LITERAL1
 tMess		LITERAL1

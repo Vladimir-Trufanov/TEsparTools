@@ -15,11 +15,8 @@ int narr = 12;        // число элементов в массиве
 const char* sarr[] =  // массив учетных данных
 {
   "TP-Link_B394",  "18009217",
-  "tve-DESKTOP",   "Ue18-647",
   "OPPO A9 2020",  "b277a4ee84e8",
   "tve-MONOBLOCK", "Ue18-647",
-  "linksystve",    "X93K6KQ6WF",
-  "GoshaIMila",    "t1s2wde4bE"
 };
 // Определяем SSID собственной сети контроллера
 // "Контроллер №1" - камера для съёмок на природе   ["DachaSad"]
