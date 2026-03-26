@@ -1,34 +1,25 @@
-/** Arduino-Esp32-CAM                                     *** ---QueueChar.ino ***
+/** Arduino-Esp32-CAM                                *** WiFiMultiEvent.ino ***
+ *   
+ *                           Пример подключения к одной из локальных сетей WiFi 
+ *          в соответствии с массивом учетных записей возможных локальных сетей
+ *                     с учётом событий и создания собственной сети контроллера
  * 
- *                        -----Пример передачи сообщения из задачи и из прерывания с
- *                                                     приемом в основном цикле
- * 
- * v1.0.2, 26.03.2026                                 Автор:      Труфанов В.Е.
+ * v1.0.3, 26.03.2026                                 Автор:      Труфанов В.Е.
  * Copyright © 2024 tve                               Дата создания: 23.03.2026
 **/
 
+// Добавляем библиотеку для подключения к одной из локальных сетей WiFi в 
+// соответствии с массивом учетных записей возможных локальных сетей и 
+// создание собственной сети контроллера
+// #include "ChipWiFi.h"
 
- // [1. Коды состояния ответа HTTP]
- // (https://developer.mozilla.org/ru/docs/Web/HTTP/Reference/Status)
-
- // [2. ESP32 WiFiMulti подключается к самой мощной сети Wi-Fi]
- // (https://microcontrollerslab.com/esp32-wifimulti-connect-to-the-strongest-wifi-network/)
-
-
-// Определяем SSID собственной сети контроллера
-// "Контроллер №1" - камера для съёмок на природе   ["DachaSad"]
-// "ESP_75C391"    - ESP32-CAM, контроллер №3       ["NaDorogu"]
-// "ESP_A7E119"    - ESP32-CAM, контроллер №6 
-//#define soft_ap_ssid "DachaSad" 
-
-// ---Подключаем файлы обеспечения передачи и приёма сообщений через очередь                //
-//#include "ChipWiFi.h"     // з----аголовочный файл класса TQueMessage                         //
-#include "DefWiFi.h"     // з----аголовочный файл класса TQueMessage                         //
+// ИЛИ из вне библиотеки подключаем и переопределяем параметры сетей 
+// для ведения локальной и собственной сети WiFi
+#include "DefWiFi.h"
 
 void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info) 
 {
-  Serial.println("WiFi подключен");
-  Serial.print("IP адресjr: "); Serial.println(IPAddress(info.got_ip.ip_info.ip.addr));
+  Serial.print("WiFi подключен. IP-адрес: "); Serial.println(IPAddress(info.got_ip.ip_info.ip.addr));
 }
 
 static unsigned long currentMillis;  // текущее время в миллисекундах 
@@ -39,7 +30,6 @@ void setup()
   delay(1000);
 
   // Включаем прикладную обработку событий с WiFi через именные функции обратного вызова
-  //WiFi.onEvent(WiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
   ChipWiFiEvent(WiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
  
   // Включаем прикладную обработку событий с WiFi через безымянные лямбда-функции 
@@ -52,16 +42,8 @@ void setup()
     },
     WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED
   );
-
-  Serial.println(ChipWiFi.Create());
-
-  //wifiMulti.addAP("TP-Link_B394",  "18009217");
-  //wifiMulti.addAP("tve-DESKTOP",   "Ue18-647");
-  //wifiMulti.addAP("OPPO A9 2020",  "b277a4ee84e8");
-  //wifiMulti.addAP("tve-MONOBLOCK", "Ue18-647");
-  //wifiMulti.addAP("linksystve",    "X93K6KQ6WF");
-  //wifiMulti.addAP("GoshaIMila",    "t1s2wde4bE");
-
+  // Строим объект класса (подключаемся к WiFi и создаём собственную сеть)
+  ChipWiFi.Create();
   // Начинаем отсчет временных интервалов для сообщений в loop()
   currentMillis = millis();
 }

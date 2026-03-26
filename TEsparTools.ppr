@@ -27,9 +27,9 @@ TEsparTools
 				examples\QueueHandlMulti\QHM_Message.h
 				examples\QueueHandlMulti\QueueHandlMulti.ino
 			+WiFiMultiEvent
-				examples\WiFiMultiEvent\ChipWiFi.cpp
 				examples\WiFiMultiEvent\ChipWiFi.h
 				examples\WiFiMultiEvent\ci.yml
+				examples\WiFiMultiEvent\DefWiFi.h
 				examples\WiFiMultiEvent\WiFiMultiEvent.ino
 		-extras
 			extras\TAttachSNTP.md
@@ -51,9 +51,17 @@ TEsparTools
 		TEsparTools.ppr
 [Open project files]
 0=examples\WiFiMultiEvent\WiFiMultiEvent.ino
+1=examples\WiFiMultiEvent\ChipWiFi.h
+2=examples\WiFiMultiEvent\DefWiFi.h
 [Selected Project Files]
 Main=
 Selected=examples\WiFiMultiEvent\WiFiMultiEvent.ino
 [examples\WiFiMultiEvent\WiFiMultiEvent.ino]
-TopLine=278
-Caret=4,300
+TopLine=28
+Caret=1,48
+[examples\WiFiMultiEvent\ChipWiFi.h]
+TopLine=110
+Caret=1,116
+[examples\WiFiMultiEvent\DefWiFi.h]
+TopLine=1
+Caret=1,11
