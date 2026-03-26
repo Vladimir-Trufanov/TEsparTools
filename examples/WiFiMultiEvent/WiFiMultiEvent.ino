@@ -1,9 +1,9 @@
-/** Arduino-Esp32-CAM                                     *** QueueChar.ino ***
+/** Arduino-Esp32-CAM                                     *** ---QueueChar.ino ***
  * 
  *                        -----Пример передачи сообщения из задачи и из прерывания с
  *                                                     приемом в основном цикле
  * 
- * v1.0.1, 25.03.2026                                 Автор:      Труфанов В.Е.
+ * v1.0.2, 26.03.2026                                 Автор:      Труфанов В.Е.
  * Copyright © 2024 tve                               Дата создания: 23.03.2026
 **/
 
@@ -22,9 +22,8 @@
 //#define soft_ap_ssid "DachaSad" 
 
 // ---Подключаем файлы обеспечения передачи и приёма сообщений через очередь                //
-#include "ChipWiFi.h"     // з----аголовочный файл класса TQueMessage                         //
-// Назначаем объект работы с сообщениями через очередь                                   //
-TChipWiFi chMulti;                                                                           //
+//#include "ChipWiFi.h"     // з----аголовочный файл класса TQueMessage                         //
+#include "DefWiFi.h"     // з----аголовочный файл класса TQueMessage                         //
 
 void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info) 
 {
@@ -40,10 +39,11 @@ void setup()
   delay(1000);
 
   // Включаем прикладную обработку событий с WiFi через именные функции обратного вызова
-  WiFi.onEvent(WiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
+  //WiFi.onEvent(WiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
+  ChipWiFiEvent(WiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
  
   // Включаем прикладную обработку событий с WiFi через безымянные лямбда-функции 
-  WiFiEventId_t eventID = WiFi.onEvent
+  WiFiEventId_t eventID = ChipWiFiEvent
   (
     [](WiFiEvent_t event, WiFiEventInfo_t info) 
     {
@@ -53,7 +53,7 @@ void setup()
     WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED
   );
 
-  Serial.println(chMulti.Create());
+  Serial.println(ChipWiFi.Create());
 
   //wifiMulti.addAP("TP-Link_B394",  "18009217");
   //wifiMulti.addAP("tve-DESKTOP",   "Ue18-647");
@@ -69,7 +69,7 @@ void setup()
 void loop() 
 {
   // Удерживаем подключение станции к WiFi 
-  chMulti.Keep();
+  ChipWiFi.Keep();
   // Выводим контрольное сообщение после каждых 5 минут
   if ((millis()-currentMillis) > 5000) 
   { 
