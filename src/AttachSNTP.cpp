@@ -3,7 +3,7 @@
  *         Подключится к пулу серверов точного времени и синхронизировать время 
  *                                                контроллера по протоколу SNTP
  * 
- * v1.0.2, 02.01.2025                                 Автор:      Труфанов В.Е.
+ * v1.1.0, 22.11.2026                                 Автор:      Труфанов В.Е.
  * Copyright © 2024 tve                               Дата создания: 27.12.2024
 **/
 
@@ -126,8 +126,8 @@ String TAttachSNTP::strTime()
    struct tm timeinfo;
    getLocalTime(&timeinfo);
    sprintf(strftime_buf,"%d-%s-%s %s:%s:%s", 
-   timeinfo.tm_year+1900, zfil2(timeinfo.tm_mon+1), zfil2(timeinfo.tm_mday),
-   zfil2(timeinfo.tm_hour), zfil2(timeinfo.tm_min), zfil2(timeinfo.tm_sec));
+   timeinfo.tm_year+1900, zfil2x(timeinfo.tm_mon+1), zfil2x(timeinfo.tm_mday),
+   zfil2x(timeinfo.tm_hour), zfil2x(timeinfo.tm_min), zfil2x(timeinfo.tm_sec));
    return String(strftime_buf);
 }
 // ****************************************************************************
@@ -149,10 +149,19 @@ String TAttachSNTP::strLocalTime(const char* value)
 // ****************************************************************************
 String TAttachSNTP::zfil2(int n) 
 {
-   String cRet;
-   if (n>9) cRet=String(n);
-   else cRet="0"+String(n);
-   return cRet;
+  String cRet;
+  if (n>9) cRet=String(n);
+  else cRet="0"+String(n);
+  return cRet;
+}
+// zfil2x добавлена по рекомендации PlatformIO 22.11.2026
+char* TAttachSNTP::zfil2x(int n) 
+{
+  String cRet;
+  if (n>9) cRet=String(n);
+  else cRet="0"+String(n);
+  strncpy(chartach, cRet.c_str(), 4);
+  return chartach;
 }
 // ****************************************************************************
 // *             Узнать подключенный пул серверов точного времени             *
