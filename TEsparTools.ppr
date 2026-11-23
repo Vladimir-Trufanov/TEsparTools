@@ -54,9 +54,10 @@ TEsparTools
 1=examples\WiFiMultiEvent\DefWiFi.h
 2=library.properties
 3=src\ChipWiFi.h
+4=src\QueChar.cpp
 [Selected Project Files]
 Main=
-Selected=src\ChipWiFi.h
+Selected=src\QueChar.cpp
 [examples\WiFiMultiEvent\WiFiMultiEvent.ino]
 TopLine=25
 Caret=1,48
@@ -69,3 +70,6 @@ Caret=14,2
 [src\ChipWiFi.h]
 TopLine=1
 Caret=21,12
+[src\QueChar.cpp]
+TopLine=129
+Caret=46,146
